@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>تسجيل جديد - أخضر</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#006d37",
+                        "on-secondary": "#ffffff",
+                        "outline": "#6f7975",
+                        "primary": "#004335",
+                        "surface-bright": "#f7faf7",
+                        "surface-container": "#ecefeb",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#a9f1d9",
+                        "surface": "#f7faf7",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-high": "#e6e9e6",
+                        "on-error": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#e0e3e0",
+                        "tertiary-fixed": "#ffdad4",
+                        "on-surface-variant": "#3f4945",
+                        "on-surface": "#191c1b",
+                        "surface-dim": "#d8dbd8",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#e0e3e0",
+                        "surface-tint": "#206a57",
+                        "on-secondary-container": "#00743a",
+                        "surface-container-low": "#f2f4f1",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#8ed4bd",
+                        "tertiary": "#612920",
+                        "on-tertiary-fixed": "#390b06",
+                        "tertiary-container": "#7d3f35",
+                        "primary-container": "#0a5c4a",
+                        "inverse-surface": "#2d312f",
+                        "on-primary-container": "#8bd2bb",
+                        "background": "#f7faf7",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#4ae183",
+                        "tertiary-fixed-dim": "#ffb4a7",
+                        "secondary-container": "#6bfe9c",
+                        "secondary-fixed": "#6bfe9c",
+                        "on-tertiary-fixed-variant": "#71352c",
+                        "on-background": "#191c1b",
+                        "outline-variant": "#bfc9c3",
+                        "inverse-primary": "#8ed4bd",
+                        "on-tertiary-container": "#ffb0a3",
+                        "inverse-on-surface": "#eff1ee",
+                        "on-secondary-fixed-variant": "#005228",
+                        "on-primary-fixed": "#002018",
+                        "on-primary-fixed-variant": "#005140",
+                        "on-secondary-fixed": "#00210c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "container-padding": "20px",
+                        "card-gap": "20px",
+                        "gutter": "16px",
+                        "section-margin": "32px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["IBM Plex Sans"],
+                        "body-sm": ["IBM Plex Sans"],
+                        "label-caps": ["IBM Plex Sans"],
+                        "title-sm": ["IBM Plex Sans"],
+                        "display-lg-mobile": ["IBM Plex Sans"],
+                        "headline-md": ["IBM Plex Sans"],
+                        "body-lg": ["IBM Plex Sans"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["34px", {"lineHeight": "42px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "display-lg-mobile": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "26px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background-color: #f7faf7;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex items-center justify-center p-container-padding overflow-x-hidden">
+<!-- Background Decorative Elements -->
+<div class="fixed inset-0 z-0">
+<div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary-fixed-dim/20 rounded-full blur-[120px]"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary-container/10 rounded-full blur-[100px]"></div>
+<img class="absolute inset-0 w-full h-full object-cover opacity-5 mix-blend-overlay" data-alt="A clean, sterile medical laboratory setting with soft focus on high-end medical equipment and glass surfaces. The lighting is bright and airy, following a minimalist medical aesthetic with a white and pale green color palette. The mood is professional, calm, and trustworthy, symbolizing precision in healthcare technology." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPN-y8XMVh9zgnszX86tsm2nDEiZ0E38adNw6C3WEGZgqvU8SJH7FMv2kkF4lWCdGOSgsEaWoLhqIgoWEnXnN41j0U2Hi05VeKbgP2s-bMeYbdMMZ_CxYXmN4yvs2P_U7EDIHLsgokUnRFb2Cn9I-ucNRyTp8yWlYvcUmnTMAGg4l8goW2_AzvDWIGr0g9eBj7juteJQ5JhbiIVGkeHKqPZibVfcw9G6FoRKIEUN9AyU0ATDWzy5t57qHPLci2UKWTFVzhdfekYktU"/>
+</div>
+<!-- Main Registration Card -->
+<main class="relative z-10 w-full max-w-[480px]">
+<div class="bg-surface-container-lowest rounded-[20px] border border-outline-variant/10 shadow-[0px_10px_30px_rgba(0,92,74,0.05)] p-8 md:p-10">
+<!-- Logo & Title -->
+<div class="text-center mb-8">
+<div class="inline-flex items-center justify-center w-16 h-16 bg-primary-container rounded-2xl mb-4 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-on-primary-container text-[32px]">health_metrics</span>
+</div>
+<h1 class="font-display-lg-mobile text-display-lg-mobile text-primary font-bold tracking-tight mb-2">أخضر</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">أنشئ حسابك الطبي الجديد</p>
+</div>
+<!-- Registration Form -->
+<form class="space-y-5">
+<!-- Full Name -->
+<div class="space-y-2">
+<label class="block font-label-caps text-label-caps text-on-surface-variant mr-4">الاسم الكامل</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute right-4 text-outline">person</span>
+<input class="w-full h-14 pr-12 pl-4 bg-surface-container-low border-transparent focus:border-primary focus:ring-0 rounded-full font-body-lg text-body-lg transition-all duration-300 outline-none" placeholder="أدخل اسمك الثلاثي" type="text"/>
+</div>
+</div>
+<!-- Email -->
+<div class="space-y-2">
+<label class="block font-label-caps text-label-caps text-on-surface-variant mr-4">البريد الإلكتروني</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute right-4 text-outline">mail</span>
+<input class="w-full h-14 pr-12 pl-4 bg-surface-container-low border-transparent focus:border-primary focus:ring-0 rounded-full font-body-lg text-body-lg transition-all duration-300 outline-none text-right" dir="ltr" placeholder="example@domain.com" type="email"/>
+</div>
+</div>
+<!-- Phone Number -->
+<div class="space-y-2">
+<label class="block font-label-caps text-label-caps text-on-surface-variant mr-4">رقم الجوال</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute right-4 text-outline">call</span>
+<input class="w-full h-14 pr-12 pl-4 bg-surface-container-low border-transparent focus:border-primary focus:ring-0 rounded-full font-body-lg text-body-lg transition-all duration-300 outline-none text-right" dir="ltr" placeholder="+966 5x xxxx xxx" type="tel"/>
+</div>
+</div>
+<!-- Password -->
+<div class="space-y-2">
+<label class="block font-label-caps text-label-caps text-on-surface-variant mr-4">كلمة المرور</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute right-4 text-outline">lock</span>
+<input class="w-full h-14 pr-12 pl-12 bg-surface-container-low border-transparent focus:border-primary focus:ring-0 rounded-full font-body-lg text-body-lg transition-all duration-300 outline-none" placeholder="••••••••" type="password"/>
+<button class="absolute left-4 text-outline hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</div>
+</div>
+<!-- Confirm Password -->
+<div class="space-y-2">
+<label class="block font-label-caps text-label-caps text-on-surface-variant mr-4">تأكيد كلمة المرور</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute right-4 text-outline">lock_reset</span>
+<input class="w-full h-14 pr-12 pl-12 bg-surface-container-low border-transparent focus:border-primary focus:ring-0 rounded-full font-body-lg text-body-lg transition-all duration-300 outline-none" placeholder="••••••••" type="password"/>
+</div>
+</div>
+<!-- Terms -->
+<div class="flex items-start gap-3 px-2 py-2">
+<input class="mt-1 w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20" id="terms" type="checkbox"/>
+<label class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed" for="terms">
+                        أوافق على <a class="text-primary font-bold hover:underline" href="#">شروط الاستخدام</a> و <a class="text-primary font-bold hover:underline" href="#">سياسة الخصوصية</a> الطبية.
+                    </label>
+</div>
+<!-- Register Button -->
+<button class="w-full h-14 bg-primary text-on-primary rounded-full font-title-sm text-title-sm shadow-lg shadow-primary/20 hover:bg-primary-container active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2" type="submit">
+                    إنشاء الحساب
+                    <span class="material-symbols-outlined">arrow_back</span>
+</button>
+</form>
+<!-- Login Link -->
+<div class="mt-8 pt-6 border-t border-outline-variant/10 text-center">
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+                    لديك حساب بالفعل؟
+                    <a class="text-primary font-bold hover:underline mr-1" href="#">تسجيل الدخول</a>
+</p>
+</div>
+</div>
+<!-- Footer Help -->
+<div class="mt-6 text-center">
+<button class="inline-flex items-center gap-2 px-4 py-2 bg-surface-container-highest/40 backdrop-blur-sm rounded-full text-on-surface-variant font-body-sm text-body-sm hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-[18px]">help</span>
+                تحتاج مساعدة؟
+            </button>
+</div>
+</main>
+<!-- Floating Branding Accent -->
+<div class="fixed bottom-8 left-8 hidden md:block">
+<div class="flex items-center gap-3 bg-white/80 backdrop-blur-md px-4 py-2 rounded-full border border-primary/10 shadow-sm">
+<div class="w-3 h-3 bg-secondary rounded-full animate-pulse"></div>
+<span class="font-label-caps text-label-caps text-primary uppercase tracking-widest">Akhdar Premium Care</span>
+</div>
+</div>
+</body></html>

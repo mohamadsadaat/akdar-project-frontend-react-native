@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&amp;family=Noto+Sans+Arabic:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#006d37",
+                        "on-secondary": "#ffffff",
+                        "outline": "#6f7975",
+                        "primary": "#004335",
+                        "surface-bright": "#f7faf7",
+                        "surface-container": "#ecefeb",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#a9f1d9",
+                        "surface": "#f7faf7",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-high": "#e6e9e6",
+                        "on-error": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#e0e3e0",
+                        "tertiary-fixed": "#ffdad4",
+                        "on-surface-variant": "#3f4945",
+                        "on-surface": "#191c1b",
+                        "surface-dim": "#d8dbd8",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#e0e3e0",
+                        "surface-tint": "#206a57",
+                        "on-secondary-container": "#00743a",
+                        "surface-container-low": "#f2f4f1",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#8ed4bd",
+                        "tertiary": "#612920",
+                        "on-tertiary-fixed": "#390b06",
+                        "tertiary-container": "#7d3f35",
+                        "primary-container": "#0a5c4a",
+                        "inverse-surface": "#2d312f",
+                        "on-primary-container": "#8bd2bb",
+                        "background": "#f7faf7",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#4ae183",
+                        "tertiary-fixed-dim": "#ffb4a7",
+                        "secondary-container": "#6bfe9c",
+                        "secondary-fixed": "#6bfe9c",
+                        "on-tertiary-fixed-variant": "#71352c",
+                        "on-background": "#191c1b",
+                        "outline-variant": "#bfc9c3",
+                        "inverse-primary": "#8ed4bd",
+                        "on-tertiary-container": "#ffb0a3",
+                        "inverse-on-surface": "#eff1ee",
+                        "on-secondary-fixed-variant": "#005228",
+                        "on-primary-fixed": "#002018",
+                        "on-primary-fixed-variant": "#005140",
+                        "on-secondary-fixed": "#00210c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "container-padding": "20px",
+                        "card-gap": "20px",
+                        "gutter": "16px",
+                        "section-margin": "32px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["IBM Plex Sans", "Noto Sans Arabic"],
+                        "body-sm": ["IBM Plex Sans", "Noto Sans Arabic"],
+                        "label-caps": ["IBM Plex Sans", "Noto Sans Arabic"],
+                        "title-sm": ["IBM Plex Sans", "Noto Sans Arabic"],
+                        "display-lg-mobile": ["IBM Plex Sans", "Noto Sans Arabic"],
+                        "headline-md": ["IBM Plex Sans", "Noto Sans Arabic"],
+                        "body-lg": ["IBM Plex Sans", "Noto Sans Arabic"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["34px", {"lineHeight": "42px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "display-lg-mobile": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "26px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Noto Sans Arabic', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .splash-overlay {
+            background-color: rgba(0, 67, 53, 0.5); /* Primary Green #004335 at 50% opacity */
+        }
+        .loader-track {
+            background: rgba(255, 255, 255, 0.2);
+            height: 4px;
+            width: 200px;
+            border-radius: 99px;
+            overflow: hidden;
+            position: relative;
+        }
+        .loader-bar {
+            background: white;
+            height: 100%;
+            width: 30%;
+            position: absolute;
+            animation: loading 2s infinite ease-in-out;
+        }
+        @keyframes loading {
+            0% { right: -30%; }
+            100% { right: 100%; }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background">
+<main class="relative h-screen w-full flex items-center justify-center overflow-hidden">
+<!-- Background Image with data-alt -->
+<div class="absolute inset-0 z-0">
+<img alt="" class="w-full h-full object-cover" data-alt="A high-end, modern medical corridor in a premium hospital setting with soft, ambient lighting and clean white surfaces. The scene features blurred medical staff in the distance, evoking a sense of calm, professional care and high-technology healthcare environments. The aesthetic is minimalist and clinical yet welcoming, using a high-key lighting style to maintain a bright, light-mode feel that complements the medical brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJp2Clh67sw4aRIAMiUq7m-EaXEqW9Lv0sleH43LBiHlJaQZp81YHh9ECxfnLJ56KWESJDS4D-UIYC-4pKWOzIoSeinMfbcg3Pu38Pz7Jb4laSinJQsuH-3b42z_uwpexEeEAjmv3mtg_4PZaBm9HZcH4gdp4OAbQQVkX-WD_heqWrhnxLsSWvWTBUeH50wqena4YsEgzXCnsVf6aeiaBWLxD9fDSbAwfPu9WKAQSI-_1hjbKc272cOtm3C1H6smtPXMl_lHHSPvJJ"/>
+<!-- #0A5C4A Overlay (Primary Container from config used as brand primary) -->
+<div class="absolute inset-0 splash-overlay backdrop-blur-[2px]"></div>
+</div>
+<!-- Content Shell -->
+<div class="relative z-10 flex flex-col items-center justify-center text-center px-container-padding">
+<!-- Logo Section -->
+<div class="mb-12">
+<!-- Large White Arabic Calligraphy Representation -->
+<h1 class="font-display-lg text-display-lg-mobile md:text-display-lg text-white mb-2 tracking-widest drop-shadow-lg">
+                    أخضر
+                </h1>
+<p class="font-label-caps text-label-caps text-on-primary-container tracking-[0.2em] opacity-90 uppercase">
+                    Healthcare
+                </p>
+</div>
+<!-- Loading Indicator -->
+<div class="flex flex-col items-center gap-4">
+<div class="loader-track">
+<div class="loader-bar"></div>
+</div>
+<span class="font-body-sm text-body-sm text-white/80">جاري التحميل...</span>
+</div>
+</div>
+<!-- Branding Bottom Anchor -->
+<div class="absolute bottom-12 left-0 right-0 z-10 flex justify-center">
+<div class="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20">
+<span class="material-symbols-outlined text-white text-[20px]" data-icon="verified_user">verified_user</span>
+<span class="font-label-caps text-label-caps text-white">نظام رعاية متقدم</span>
+</div>
+</div>
+</main>
+<!-- Navigation Shell Suppressed as per Task: Splash Screen is Transactional -->
+</body></html>

@@ -1,24 +1,54 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { I18nManager, Platform } from 'react-native';
+import { useEffect } from 'react';
+import { AuthProvider, useAuth } from '../src/context/AuthContext';
+import { colors } from '../src/theme/colors';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+// Force RTL layout for Arabic support
+if (!I18nManager.isRTL) {
+  I18nManager.allowRTL(true);
+  I18nManager.forceRTL(true);
+}
 
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+if (Platform.OS === 'web' && typeof document !== 'undefined') {
+  document.documentElement.dir = 'rtl';
+}
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
+function RootNavigation() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    const inAuthGroup = segments[0] === '(auth)';
+    const isSplash = (segments as string[]).length === 0;
+
+    if (!isAuthenticated && !inAuthGroup && !isSplash) {
+      // Redirect to the login page.
+      router.replace('/(auth)/login');
+    } else if (isAuthenticated && (inAuthGroup || isSplash)) {
+      // Redirect away from the login page.
+      router.replace('/(tabs)');
+    }
+  }, [isAuthenticated, segments, isLoading, router]);
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
+    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="(auth)" options={{ animation: 'fade' }} />
+      <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
+    </Stack>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <RootNavigation />
       <StatusBar style="auto" />
-    </ThemeProvider>
+    </AuthProvider>
   );
 }

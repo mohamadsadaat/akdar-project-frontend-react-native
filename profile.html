@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary": "#006d37",
+                    "on-secondary": "#ffffff",
+                    "outline": "#6f7975",
+                    "primary": "#004335",
+                    "surface-bright": "#f7faf7",
+                    "surface-container": "#ecefeb",
+                    "on-primary": "#ffffff",
+                    "primary-fixed": "#a9f1d9",
+                    "surface": "#f7faf7",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-high": "#e6e9e6",
+                    "on-error": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-highest": "#e0e3e0",
+                    "tertiary-fixed": "#ffdad4",
+                    "on-surface-variant": "#3f4945",
+                    "on-surface": "#191c1b",
+                    "surface-dim": "#d8dbd8",
+                    "error": "#ba1a1a",
+                    "surface-variant": "#e0e3e0",
+                    "surface-tint": "#206a57",
+                    "on-secondary-container": "#00743a",
+                    "surface-container-low": "#f2f4f1",
+                    "on-error-container": "#93000a",
+                    "primary-fixed-dim": "#8ed4bd",
+                    "tertiary": "#612920",
+                    "on-tertiary-fixed": "#390b06",
+                    "tertiary-container": "#7d3f35",
+                    "primary-container": "#0a5c4a",
+                    "inverse-surface": "#2d312f",
+                    "on-primary-container": "#8bd2bb",
+                    "background": "#f7faf7",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed-dim": "#4ae183",
+                    "tertiary-fixed-dim": "#ffb4a7",
+                    "secondary-container": "#6bfe9c",
+                    "secondary-fixed": "#6bfe9c",
+                    "on-tertiary-fixed-variant": "#71352c",
+                    "on-background": "#191c1b",
+                    "outline-variant": "#bfc9c3",
+                    "inverse-primary": "#8ed4bd",
+                    "on-tertiary-container": "#ffb0a3",
+                    "inverse-on-surface": "#eff1ee",
+                    "on-secondary-fixed-variant": "#005228",
+                    "on-primary-fixed": "#002018",
+                    "on-primary-fixed-variant": "#005140",
+                    "on-secondary-fixed": "#00210c"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "base": "8px",
+                    "container-padding": "20px",
+                    "card-gap": "20px",
+                    "gutter": "16px",
+                    "section-margin": "32px"
+            },
+            "fontFamily": {
+                    "display-lg": ["IBM Plex Sans"],
+                    "body-sm": ["IBM Plex Sans"],
+                    "label-caps": ["IBM Plex Sans"],
+                    "title-sm": ["IBM Plex Sans"],
+                    "display-lg-mobile": ["IBM Plex Sans"],
+                    "headline-md": ["IBM Plex Sans"],
+                    "body-lg": ["IBM Plex Sans"]
+            },
+            "fontSize": {
+                    "display-lg": ["34px", {"lineHeight": "42px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "display-lg-mobile": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "26px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'IBM Plex Sans', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .card-shadow { shadow-[0px_10px_30px_rgba(0,92,74,0.05)]; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-32">
+<!-- Top App Bar -->
+<header class="fixed top-0 left-0 right-0 z-50 flex flex-row-reverse justify-between items-center px-container-padding w-full h-16 bg-surface/80 backdrop-blur-md shadow-[0px_10px_30px_rgba(0,92,74,0.05)]">
+<div class="font-display-lg-mobile text-display-lg-mobile text-primary font-bold tracking-tight">أخضر</div>
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-primary-fixed/30 flex items-center justify-center overflow-hidden border border-primary/10">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A professional close-up portrait of a middle-aged woman with a calm and trustworthy expression, set against a soft-focus medical clinic background. The lighting is bright and airy, following a clean light-mode aesthetic with soft green and white tones. The overall atmosphere is premium, modern, and clinical yet welcoming." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGfwblBu5EMyGRn4e-GfSgd5uV9ixwJ7KqSsZSZ9Mqh21fP3P3TinXwFHiedlibLMnk2Xldp97X6xRRCz6pyjNckuZAWsEfLaVjn0p790PN7Ir0QrjHctf_x3hnLwpqLWXMYpEqbFAgBCpWOQwZ8invW9aLZWTiR8NPw9aaoQ2Ppm2W88s9c7_xEbyLC7fBplDZUtmGhAWDlElp6EB3AnE6vJG4FaJFSBHcV_MM3EUcelENKt2g3MhgoFmC9TgF75WI0AsDB6jjDbZ"/>
+</div>
+</div>
+<button class="text-primary active:scale-95 duration-200">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</header>
+<main class="mt-20 px-container-padding space-y-card-gap">
+<!-- Profile Header Section -->
+<section class="flex flex-col items-center py-6">
+<div class="relative group">
+<div class="w-28 h-28 rounded-full border-4 border-white shadow-lg overflow-hidden relative">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="A detailed portrait of a female healthcare user with gentle features and a friendly smile. She is positioned in a modern, brightly lit environment that reflects high-end medical care quality. The color palette consists of soft emerald greens and pristine whites, emphasizing a clean and professional healthcare brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBaKLkqaYy7dqbhZJJCC5VHo_w5GI9oCCmwQGndvAU9TbYktsUDmpvVRP03JlgkdptI0wqW1y12pqy4Xxng1qHFUPWvm8ffxpU1OCUBVmOXNAaOPSpWoP_nCPPicKdtrOFBqAOu-XXoqx6zckZE-5q3V5fJfyDGEGmL85D-VI3JMaoJegkvUzKUJeuJbXbfYuvY-3vp2EmCdKboBSoZB8GwvdiXZjv56-fj4H46tGVBr6xov5Q7gD-QQSiv7h5n321B_11PFvTvvz8O"/>
+<div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+<span class="material-symbols-outlined text-white">photo_camera</span>
+</div>
+</div>
+<button class="absolute bottom-1 left-1 bg-secondary text-white p-1.5 rounded-full shadow-md border-2 border-white active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-sm">edit</span>
+</button>
+</div>
+<h1 class="font-headline-md text-headline-md mt-4 text-primary">سارة أحمد الهاشمي</h1>
+<p class="font-body-sm text-body-sm text-outline">معرف المريض: #AK-882910</p>
+</section>
+<!-- Bento Grid Medical Summary -->
+<section class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-lowest p-4 rounded-[20px] border border-primary/10 shadow-[0px_10px_30px_rgba(0,92,74,0.05)] flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-secondary mb-2">bloodtype</span>
+<span class="font-label-caps text-label-caps text-outline">فصيلة الدم</span>
+<span class="font-title-sm text-title-sm text-primary">O+</span>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-[20px] border border-primary/10 shadow-[0px_10px_30px_rgba(0,92,74,0.05)] flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-secondary mb-2">height</span>
+<span class="font-label-caps text-label-caps text-outline">الطول</span>
+<span class="font-title-sm text-title-sm text-primary">165 سم</span>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-[20px] border border-primary/10 shadow-[0px_10px_30px_rgba(0,92,74,0.05)] flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-secondary mb-2">monitor_weight</span>
+<span class="font-label-caps text-label-caps text-outline">الوزن</span>
+<span class="font-title-sm text-title-sm text-primary">62 كجم</span>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-[20px] border border-primary/10 shadow-[0px_10px_30px_rgba(0,92,74,0.05)] flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-secondary mb-2">calendar_month</span>
+<span class="font-label-caps text-label-caps text-outline">العمر</span>
+<span class="font-title-sm text-title-sm text-primary">29 سنة</span>
+</div>
+</section>
+<!-- Account Settings List -->
+<section class="bg-surface-container-lowest rounded-[20px] border border-primary/10 shadow-[0px_10px_30px_rgba(0,92,74,0.05)] overflow-hidden">
+<div class="p-4 border-b border-outline-variant/10">
+<h2 class="font-title-sm text-title-sm text-primary">إعدادات الحساب</h2>
+</div>
+<div class="divide-y divide-outline-variant/10">
+<a class="flex items-center justify-between p-4 hover:bg-primary-container/5 transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">person</span>
+<span class="font-body-lg text-body-lg text-on-surface">المعلومات الشخصية</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_left</span>
+</a>
+<a class="flex items-center justify-between p-4 hover:bg-primary-container/5 transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">credit_card</span>
+<span class="font-body-lg text-body-lg text-on-surface">طرق الدفع</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_left</span>
+</a>
+<a class="flex items-center justify-between p-4 hover:bg-primary-container/5 transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">verified_user</span>
+<span class="font-body-lg text-body-lg text-on-surface">الخصوصية والأمان</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_left</span>
+</a>
+</div>
+</section>
+<!-- Help & Support -->
+<section class="bg-surface-container-lowest rounded-[20px] border border-primary/10 shadow-[0px_10px_30px_rgba(0,92,74,0.05)] overflow-hidden">
+<div class="p-4 border-b border-outline-variant/10">
+<h2 class="font-title-sm text-title-sm text-primary">الدعم والمساعدة</h2>
+</div>
+<div class="divide-y divide-outline-variant/10">
+<a class="flex items-center justify-between p-4 hover:bg-primary-container/5 transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">help</span>
+<span class="font-body-lg text-body-lg text-on-surface">الأسئلة الشائعة</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_left</span>
+</a>
+<a class="flex items-center justify-between p-4 hover:bg-primary-container/5 transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">support_agent</span>
+<span class="font-body-lg text-body-lg text-on-surface">تواصل معنا</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_left</span>
+</a>
+</div>
+</section>
+<!-- Logout Button -->
+<button class="w-full flex items-center justify-center gap-2 p-4 rounded-full border-2 border-error text-error font-title-sm text-title-sm hover:bg-error/5 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined">logout</span>
+            تسجيل الخروج
+        </button>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-4 left-0 right-0 z-50 flex flex-row-reverse justify-around items-center w-auto mx-container-padding h-20 bg-surface-container-lowest/90 backdrop-blur-lg rounded-full border border-outline-variant/20 shadow-[0px_10px_30px_rgba(0,92,74,0.15)]">
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-all p-2 rounded-xl">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-caps text-label-caps">الرئيسية</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-all p-2 rounded-xl">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-label-caps text-label-caps">المواعيد</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-all p-2 rounded-xl">
+<span class="material-symbols-outlined">medical_services</span>
+<span class="font-label-caps text-label-caps">السجل</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-all p-2 rounded-xl">
+<span class="material-symbols-outlined">notifications</span>
+<span class="font-label-caps text-label-caps">التنبيهات</span>
+</div>
+<div class="flex flex-col items-center justify-center text-primary bg-primary-fixed/20 rounded-xl p-2 shadow-[0px_0px_20px_rgba(0,109,55,0.3)]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-label-caps text-label-caps">الملف</span>
+</div>
+</nav>
+<!-- Floating Action Button Context (Optional for consistency) -->
+<!-- Suppressed on Profile per UX goal of focusing on identity/settings -->
+</body></html>

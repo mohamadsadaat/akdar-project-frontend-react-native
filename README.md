@@ -1,50 +1,117 @@
-# Welcome to your Expo app 👋
+# مشروع أخضر (Expo + React Native)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+هذا المشروع مبني باستخدام Expo مع دعم TypeScript و `expo-router`. واجهته باللغة العربية مع دعم RTL (اتجاه من اليمين لليسار).
 
-## Get started
+موجز تقني:
+- منصة: Expo
+- لغة: TypeScript + React Native
+- Router: `expo-router` (file-based routing)
+- إدارة التوثيق البسيطة: `src/context/AuthContext.tsx`
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## تشغيل المشروع محليًا
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+1. تثبيت الحزم:
 
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+2. بدء سيرفر التطوير (Metro / Expo):
 
-## Learn more
+```bash
+npx expo start -c
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+3. أو تشغيل على أندرويد/آي أو إس:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npx expo run:android
+npx expo run:ios
+```
 
-## Join the community
+ملاحظة: استخدم `expo start` ثم افتح عبر Expo Go أو المحاكي/الجهاز الفعلي.
 
-Join our community of developers creating universal apps.
+---
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## بنية المشروع (موجز)
+
+- `app/` — مجلد الصفحات وملفات التوجيه (file-based routes). كل ملف هنا يمثل شاشة أو مجموعة شاشات.
+- `src/` — مكونات قابلة لإعادة الاستخدام، سياق التطبيق، بيانات وهمية، والمواضيع (theme).
+  - `src/components/` — مكونات واجهة المستخدم (Buttons, Inputs, Cards, Screen, AuthLayout...)
+  - `src/context/` — مزود السياق للمصادقة (`AuthContext.tsx`).
+  - `src/theme/` — الألوان، الطباعة، المسافات، والظلال.
+  - `src/data/mockData.ts` — بيانات وهمية للاختبار.
+- `assets/` — صور وأيقونات.
+- `android/` — إعدادات بناء Android (مدفوع بـ Expo config / bare workflow جزئياً).
+
+---
+
+## وصف الصفحات (Screens)
+
+الصفحات موجودة داخل `app/` باستعمال بنية `expo-router`:
+
+- `app/index.tsx` — شاشة البداية (Splash). تعرض شعار التطبيق ثم توجه المستخدم بناءً على حالة المصادقة.
+
+- `app/(auth)/login.tsx` — شاشة تسجيل الدخول. تستعمل `AuthLayout` و`AuthInput` و`AuthButton` مع تحقق بسيط من الحقول.
+
+- `app/(auth)/register.tsx` — شاشة تسجيل مستخدم جديد (نموذج التسجيل مع تحقق مبدئي).
+
+- `app/(auth)/forgotPassword.tsx` — استعادة كلمة المرور (محاكاة إرسال رابط إعادة التعيين).
+
+- `app/(tabs)/_layout.tsx` — تخطيط علامات التبويب (Tabs) ويستخدم `BottomTabBar` المخصص.
+
+- `app/(tabs)/index.tsx` — الشاشة الرئيسية (Home). تعرض ملخص النشاط، بطاقة الموعد القادم، وصول سريع وتنبيهات.
+
+- `app/(tabs)/appointments.tsx` — شاشة المواعيد: تعرض قائمة المواعيد، أزرار الإجراء (إلغاء/إعادة جدولة) وزر FAB (`+`) لإضافة حجز جديد.
+
+- `app/(tabs)/healthRecord.tsx` — السجل الصحي: يعرض السجل الطبي في شكل خط زمني، ويمكن الضغط على زر FAB (`+`) لإنشاء إدخال/حجز جديد.
+
+- `app/(tabs)/notifications.tsx` — صفحة التنبيهات: قوائم تنبيهات قابلة للتعليم كمقروء.
+
+- `app/(tabs)/profile.tsx` — صفحة الملف الشخصي وإعدادات الحساب.
+
+- `app/BookAppointment.tsx` — شاشة حجز موعد (تفتح حالياً من FAB في الصفحات أعلاه).
+
+- `app/modal.tsx` — مثال على شاشة مودال تستخدم `ThemedText`/`ThemedView`.
+
+ملاحظات: قمت مؤخرًا بربط أزرار FAB في `app/(tabs)/appointments.tsx` و`app/(tabs)/healthRecord.tsx` للتنقّل إلى `/BookAppointment`.
+
+---
+
+## مكونات مهمة داخل `src/components`
+
+- `AuthLayout` — تخطيط شاشات المصادقة (خلفية مزخرفة وبطاقة مدخلات).
+- `AuthInput`, `AuthButton` — عناصر إدخال وزر متوافقة مع التصميم العربي.
+- `BottomTabBar` — شريط التنقل السفلي المخصص.
+- `Screen` — مكون غلاف للشاشات مع `SafeAreaView` و`StatusBar`.
+- `Card`, `CustomModal`, `AppointmentCard` — مكونات مستخدمة عبر الشاشات.
+
+---
+
+## ملاحظات تطويرية وتوصيات مستقبلية
+
+- لا يوجد API حقيقي حالياً — أنصح بإنشاء `src/api/` يحتوي على `client.ts` (axios أو fetch wrapper) وملفات خدمة لكل مورد (appointments, auth, profile).
+- حفظ حالة المصادقة بشكل دائم: استخدم `expo-secure-store` أو `AsyncStorage` لحفظ التوكن وإعادة استرداده عند بدء التطبيق.
+- نمذجة النماذج: استبدال التحققات اليدوية بمزيج `react-hook-form` + `yup` لتبسيط إدارة الأخطاء.
+- i18n: حالياً التطبيق بالعربية مع RTL مفروض. لإضافة لغات أخرى استعمل `react-i18next` أو مكتبة مماثلة.
+- تحسين الصور: تحويل الصور الكبيرة إلى webp وLazy-loading للصور في القوائم.
+- اختبارات: إضافة اختبارات وحدة ومكونات (`jest` + `@testing-library/react-native`).
+- CI: أضِف GitHub Actions لفحص `npm install`, `npm run lint`, و`npx expo prebuild` أو بناء التجارب.
+
+---
+
+## تغييرات وشغل قمت به مؤخراً
+
+- ربطت زرّ FAB في `app/(tabs)/appointments.tsx` و`app/(tabs)/healthRecord.tsx` ليقومان بالتنقّل إلى شاشة `app/BookAppointment.tsx` عند الضغط.
+
+---
+
+## ماذا أستطيع أن أفعل بعد ذلك؟
+
+- إنشاء مجلد `src/api` مع `client.ts` وملف مثال لنداء تسجيل الدخول.
+- إضافة حفظ حالة جلسة المصادقة باستخدام `expo-secure-store`.
+- إعداد قالب `react-hook-form` في شاشة `BookAppointment` كمثال.
+
+أخبرني أي خيار تريدني أن أبدأ به.

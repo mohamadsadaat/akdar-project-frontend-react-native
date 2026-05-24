@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary": "#006d37",
+                    "on-secondary": "#ffffff",
+                    "outline": "#6f7975",
+                    "primary": "#004335",
+                    "surface-bright": "#f7faf7",
+                    "surface-container": "#ecefeb",
+                    "on-primary": "#ffffff",
+                    "primary-fixed": "#a9f1d9",
+                    "surface": "#f7faf7",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-high": "#e6e9e6",
+                    "on-error": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-highest": "#e0e3e0",
+                    "tertiary-fixed": "#ffdad4",
+                    "on-surface-variant": "#3f4945",
+                    "on-surface": "#191c1b",
+                    "surface-dim": "#d8dbd8",
+                    "error": "#ba1a1a",
+                    "surface-variant": "#e0e3e0",
+                    "surface-tint": "#206a57",
+                    "on-secondary-container": "#00743a",
+                    "surface-container-low": "#f2f4f1",
+                    "on-error-container": "#93000a",
+                    "primary-fixed-dim": "#8ed4bd",
+                    "tertiary": "#612920",
+                    "on-tertiary-fixed": "#390b06",
+                    "tertiary-container": "#7d3f35",
+                    "primary-container": "#0a5c4a",
+                    "inverse-surface": "#2d312f",
+                    "on-primary-container": "#8bd2bb",
+                    "background": "#f7faf7",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed-dim": "#4ae183",
+                    "tertiary-fixed-dim": "#ffb4a7",
+                    "secondary-container": "#6bfe9c",
+                    "secondary-fixed": "#6bfe9c",
+                    "on-tertiary-fixed-variant": "#71352c",
+                    "on-background": "#191c1b",
+                    "outline-variant": "#bfc9c3",
+                    "inverse-primary": "#8ed4bd",
+                    "on-tertiary-container": "#ffb0a3",
+                    "inverse-on-surface": "#eff1ee",
+                    "on-secondary-fixed-variant": "#005228",
+                    "on-primary-fixed": "#002018",
+                    "on-primary-fixed-variant": "#005140",
+                    "on-secondary-fixed": "#00210c"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "base": "8px",
+                    "container-padding": "20px",
+                    "card-gap": "20px",
+                    "gutter": "16px",
+                    "section-margin": "32px"
+            },
+            "fontFamily": {
+                    "display-lg": ["IBM Plex Sans"],
+                    "body-sm": ["IBM Plex Sans"],
+                    "label-caps": ["IBM Plex Sans"],
+                    "title-sm": ["IBM Plex Sans"],
+                    "display-lg-mobile": ["IBM Plex Sans"],
+                    "headline-md": ["IBM Plex Sans"],
+                    "body-lg": ["IBM Plex Sans"]
+            },
+            "fontSize": {
+                    "display-lg": ["34px", {"lineHeight": "42px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "display-lg-mobile": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "26px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background-color: #f7faf7;
+        }
+        .notification-card {
+            border: 1px solid rgba(10, 92, 74, 0.1);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 right-0 z-50 flex flex-row-reverse justify-between items-center px-container-padding bg-surface/80 backdrop-blur-md shadow-[0px_10px_30px_rgba(0,92,74,0.05)] w-full h-16">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="settings">settings</span>
+</div>
+<h1 class="font-display-lg-mobile text-display-lg-mobile text-primary font-bold tracking-tight">أخضر</h1>
+<div class="w-10 h-10 rounded-full bg-primary-fixed overflow-hidden border-2 border-white shadow-sm">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="A professional headshot of a female doctor wearing a white lab coat and a stethoscope around her neck. She has a warm, confident expression, set against a clean, softly lit clinic background with a premium medical green tint. The lighting is bright and modern, creating a trustworthy and high-end healthcare aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnObThLJZOchzGKOY6_hKRpBENF-13iroPjJVbsjlU_-pLAnNmrckHHoJB1sK2AIVmw8erE12KO3fY0UOvBKvWjrIlyj4hRnocyfhun59y-Y5CMKPj6ZDVZ47uuoO6vhSE4n8xISof_WKfRFQ1aWg1tuBaFLJBXJRgxMocZ8U6nYwM8FrGhsax4g-_wYxNkxP56sw2_T-37X8vJSEKjqIdOZpY1y6FLS_Js-aEkTS9M3uDOXA7zLLc6xrJ50_cjQ1l1Rlem20KWtER"/>
+</div>
+</header>
+<main class="mt-20 px-container-padding max-w-2xl mx-auto">
+<!-- Section Header -->
+<div class="flex justify-between items-center mb-6">
+<h2 class="font-headline-md-mobile text-headline-md-mobile text-primary">التنبيهات</h2>
+<button class="text-secondary font-label-caps text-label-caps flex items-center gap-1 bg-secondary-container/20 px-4 py-2 rounded-full">
+<span>تحديد كـ مقروء الكل</span>
+<span class="material-symbols-outlined text-sm" data-icon="done_all">done_all</span>
+</button>
+</div>
+<!-- Notification List -->
+<div class="flex flex-col gap-card-gap">
+<!-- Unread Message Notification -->
+<div class="notification-card bg-surface-container-lowest p-5 rounded-[20px] shadow-[0px_10px_30px_rgba(0,92,74,0.05)] relative overflow-hidden flex gap-4 transition-all active:scale-95">
+<!-- Unread Indicator Dot -->
+<div class="absolute top-4 left-4 w-2.5 h-2.5 bg-secondary rounded-full shadow-[0_0_10px_rgba(0,109,55,0.4)]"></div>
+<div class="flex-shrink-0 w-12 h-12 rounded-2xl bg-primary-fixed/30 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="chat_bubble">chat_bubble</span>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-title-sm text-title-sm text-primary">رسالة جديدة من الطبيب</h3>
+<span class="font-label-caps text-label-caps text-outline">منذ دقيقتين</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">د. أحمد قام بالرد على استفسارك بخصوص نتائج التحاليل الأخيرة. يمكنك الاطلاع عليها الآن.</p>
+</div>
+</div>
+<!-- Medication Notification (Read) -->
+<div class="notification-card bg-surface-container-low/50 p-5 rounded-[20px] shadow-[0px_4px_10px_rgba(0,92,74,0.02)] flex gap-4 transition-all opacity-80">
+<div class="flex-shrink-0 w-12 h-12 rounded-2xl bg-secondary-container/40 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-2xl" data-icon="medical_services">medical_services</span>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-title-sm text-title-sm text-primary">موعد الدواء</h3>
+<span class="font-label-caps text-label-caps text-outline">8:00 ص</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">حان الوقت لتناول جرعة الصباح من "ليبيتور 20 ملجم". يرجى تأكيد التناول.</p>
+</div>
+</div>
+<!-- Appointment Notification (Unread) -->
+<div class="notification-card bg-surface-container-lowest p-5 rounded-[20px] shadow-[0px_10px_30px_rgba(0,92,74,0.05)] relative overflow-hidden flex gap-4 transition-all active:scale-95">
+<div class="absolute top-4 left-4 w-2.5 h-2.5 bg-secondary rounded-full shadow-[0_0_10px_rgba(0,109,55,0.4)]"></div>
+<div class="flex-shrink-0 w-12 h-12 rounded-2xl bg-tertiary-fixed/40 flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary text-2xl" data-icon="calendar_today">calendar_today</span>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-title-sm text-title-sm text-primary">تأكيد موعد</h3>
+<span class="font-label-caps text-label-caps text-outline">أمس</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">تم تأكيد موعدك مع عيادة القلب يوم الثلاثاء القادم الساعة 10:00 صباحاً.</p>
+</div>
+</div>
+<!-- Hero Section / Promo Style Card -->
+<div class="relative w-full h-48 rounded-[20px] overflow-hidden shadow-[0px_10px_30px_rgba(0,92,74,0.15)] my-4">
+<img class="w-full h-full object-cover" data-alt="A wide, high-quality photograph of a modern, tranquil medical clinic interior featuring minimalist furniture, large windows with soft natural light, and lush green plants. The color palette is dominated by calm primary greens and soft whites, creating a premium healthcare atmosphere that feels professional yet welcoming." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2bhGvnGQEPrnL0TmXaUGGgW84Xmzh7rpTE7-Zk8s6VjKTb88JN3spBT67xyYloTcMJZUAAOKJU4qja8h7jM7Zp-mgCKO6RGbdzYcNGDQFDbZyG3SzDZfn2oz0VLwnFW67auoPX7ZNwJ38zr_5_9VNK4CHVT_7D_4ehT-mwOAHRx1X_AFwpOF7PubPnoXodYJ-xgnXooPS8-0VecfHGnIMsjGIykO4YAcF5ByqcYOWlZSx14OFbcl1DiDwK33y0xYoyb2B6ZIjGgAN"/>
+<div class="absolute inset-0 bg-gradient-to-l from-primary/90 to-transparent flex items-center pr-8">
+<div class="text-white max-w-[200px]">
+<h4 class="font-headline-md text-headline-md mb-2">خدمة جديدة</h4>
+<p class="font-body-sm text-body-sm opacity-90">احجز استشارتك المرئية الآن مع كبار الأطباء.</p>
+</div>
+</div>
+</div>
+<!-- Lab Result Notification (Read) -->
+<div class="notification-card bg-surface-container-low/50 p-5 rounded-[20px] shadow-[0px_4px_10px_rgba(0,92,74,0.02)] flex gap-4 transition-all opacity-80">
+<div class="flex-shrink-0 w-12 h-12 rounded-2xl bg-primary-fixed/30 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="description">description</span>
+</div>
+<div class="flex-grow">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-title-sm text-title-sm text-primary">نتائج المختبر</h3>
+<span class="font-label-caps text-label-caps text-outline">منذ يومين</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">نتائج تحليل الدم أصبحت متوفرة في ملفك الطبي. الرجاء مراجعتها مع الطبيب.</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button Contextual (Hidden as per rule for Details/Settings screens, but shown here for notifications if it makes sense) -->
+<!-- Suppressed based on rule: FAB should be suppressed on transactional/details pages. Notifications are task-focused/details. -->
+<!-- BottomNavBar -->
+<nav class="fixed bottom-4 left-0 right-0 z-50 flex flex-row-reverse justify-around items-center w-auto mx-container-padding mb-4 h-20 bg-surface-container-lowest/90 dark:bg-surface-container-highest/90 backdrop-blur-lg rounded-full border border-outline-variant/20 shadow-[0px_10px_30px_rgba(0,92,74,0.15)]">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-all active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-caps text-label-caps">الرئيسية</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-all active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-label-caps text-label-caps">المواعيد</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-all active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="medical_services">medical_services</span>
+<span class="font-label-caps text-label-caps">السجل</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary bg-primary-fixed/20 rounded-xl p-2 shadow-[0px_0px_20px_rgba(0,109,55,0.3)] dark:shadow-[0px_0px_20px_rgba(74,225,131,0.2)]" href="#">
+<span class="material-symbols-outlined" data-icon="notifications" style="font-variation-settings: 'FILL' 1;">notifications</span>
+<span class="font-label-caps text-label-caps">التنبيهات</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-all active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-caps text-label-caps">الملف</span>
+</a>
+</nav>
+</body></html>

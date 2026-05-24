@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>أخضر - تسجيل الدخول</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-overlay {
+            background: linear-gradient(180deg, rgba(0, 67, 53, 0.85) 0%, rgba(0, 109, 55, 0.9) 100%);
+        }
+        .profile-glow {
+            box-shadow: 0px 0px 20px rgba(74, 225, 131, 0.4);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#006d37",
+                        "on-secondary": "#ffffff",
+                        "outline": "#6f7975",
+                        "primary": "#004335",
+                        "surface-bright": "#f7faf7",
+                        "surface-container": "#ecefeb",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#a9f1d9",
+                        "surface": "#f7faf7",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-high": "#e6e9e6",
+                        "on-error": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#e0e3e0",
+                        "tertiary-fixed": "#ffdad4",
+                        "on-surface-variant": "#3f4945",
+                        "on-surface": "#191c1b",
+                        "surface-dim": "#d8dbd8",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#e0e3e0",
+                        "surface-tint": "#206a57",
+                        "on-secondary-container": "#00743a",
+                        "surface-container-low": "#f2f4f1",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#8ed4bd",
+                        "tertiary": "#612920",
+                        "on-tertiary-fixed": "#390b06",
+                        "tertiary-container": "#7d3f35",
+                        "primary-container": "#0a5c4a",
+                        "inverse-surface": "#2d312f",
+                        "on-primary-container": "#8bd2bb",
+                        "background": "#f7faf7",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#4ae183",
+                        "tertiary-fixed-dim": "#ffb4a7",
+                        "secondary-container": "#6bfe9c",
+                        "secondary-fixed": "#6bfe9c",
+                        "on-tertiary-fixed-variant": "#71352c",
+                        "on-background": "#191c1b",
+                        "outline-variant": "#bfc9c3",
+                        "inverse-primary": "#8ed4bd",
+                        "on-tertiary-container": "#ffb0a3",
+                        "inverse-on-surface": "#eff1ee",
+                        "on-secondary-fixed-variant": "#005228",
+                        "on-primary-fixed": "#002018",
+                        "on-primary-fixed-variant": "#005140",
+                        "on-secondary-fixed": "#00210c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "container-padding": "20px",
+                        "card-gap": "20px",
+                        "gutter": "16px",
+                        "section-margin": "32px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["IBM Plex Sans"],
+                        "body-sm": ["IBM Plex Sans"],
+                        "label-caps": ["IBM Plex Sans"],
+                        "title-sm": ["IBM Plex Sans"],
+                        "display-lg-mobile": ["IBM Plex Sans"],
+                        "headline-md": ["IBM Plex Sans"],
+                        "body-lg": ["IBM Plex Sans"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["34px", {"lineHeight": "42px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "display-lg-mobile": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "26px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background min-h-screen flex items-center justify-center">
+<!-- Background Image with Dark Green Overlay -->
+<div class="fixed inset-0 z-0">
+<img alt="Healthcare Background" class="w-full h-full object-cover" data-alt="A high-end, clean medical environment featuring a modern hospital corridor with soft, sterile lighting. The scene is captured with a shallow depth of field, focusing on sleek glass partitions and professional medical equipment in the background. The overall aesthetic is professional and calm, using a palette of whites and soft grays that perfectly complements a premium healthcare brand identity. The lighting is bright yet diffused, suggesting a peaceful and technologically advanced care facility." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAukq6AR4XovAvpjs6NrhnVzQpDorMzvI29RmvtNAGnK0eMqnBudHlKav_6wzqlF-vAF1yzKkziT3YVy_5K4YX7fdQGidc5-E3ZFfron0QaTIuhUKrBvidIv0CL7lACz0jbQ4IocW9Yx_mv3ER3Rsb6-Y2N2EvvZx9lsHPTOd8YZgM6fmbUX5oIMKRSvXWh6nQMJz6U7UQG7ynhB_wfGudekf__DHTcJQU_uW7jLKHpN6sZKcM9tSRhYyMMLMQt8uIrJG658Ka5nac6"/>
+<div class="absolute inset-0 glass-overlay"></div>
+</div>
+<!-- Login Container -->
+<main class="relative z-10 w-full max-w-md px-container-padding">
+<!-- White Card -->
+<div class="bg-surface-container-lowest rounded-[20px] pt-12 pb-10 px-8 shadow-[0px_10px_30px_rgba(0,92,74,0.15)] relative border border-primary/10">
+<!-- Floating Circular Profile Icon -->
+<div class="absolute -top-12 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full bg-surface-container-lowest p-1 shadow-lg profile-glow flex items-center justify-center">
+<div class="w-full h-full rounded-full bg-primary-fixed/20 flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-primary text-[48px]" data-icon="person">person</span>
+</div>
+</div>
+<!-- Header Text -->
+<div class="text-center mb-8 pt-4">
+<h1 class="font-display-lg-mobile text-display-lg-mobile text-primary font-bold tracking-tight mb-2">أخضر</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">مرحباً بك في نظام الرعاية المتكامل</p>
+</div>
+<!-- Login Form -->
+<form class="space-y-6">
+<!-- Email Input -->
+<div class="space-y-2">
+<label class="block font-label-caps text-label-caps text-on-surface-variant px-1">البريد الإلكتروني</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline text-[20px]" data-icon="mail">mail</span>
+<input class="w-full bg-surface-container-low border-none rounded-xl py-4 pr-12 pl-4 text-on-surface focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all outline-none font-body-lg text-body-lg text-right" placeholder="example@health.com" type="email"/>
+</div>
+</div>
+<!-- Password Input -->
+<div class="space-y-2">
+<div class="flex justify-between items-center px-1">
+<label class="block font-label-caps text-label-caps text-on-surface-variant">كلمة المرور</label>
+<a class="font-label-caps text-label-caps text-secondary hover:text-primary transition-colors" href="#">نسيت كلمة المرور؟</a>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline text-[20px]" data-icon="lock">lock</span>
+<input class="w-full bg-surface-container-low border-none rounded-xl py-4 pr-12 pl-4 text-on-surface focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all outline-none font-body-lg text-body-lg text-right" placeholder="••••••••" type="password"/>
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-[20px] cursor-pointer" data-icon="visibility">visibility</span>
+</div>
+</div>
+<!-- Login Button -->
+<button class="w-full bg-primary text-on-primary font-title-sm text-title-sm py-4 rounded-full shadow-[0px_4px_12px_rgba(0,67,53,0.3)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-4" type="submit">
+<span>تسجيل الدخول</span>
+<span class="material-symbols-outlined" data-icon="login">login</span>
+</button>
+</form>
+<!-- Register Link -->
+<div class="mt-8 text-center">
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                    ليس لديك حساب؟ 
+                    <a class="text-secondary font-bold hover:underline transition-all" href="#">إنشاء حساب جديد</a>
+</p>
+</div>
+</div>
+<!-- Language Switcher / Footer Links -->
+<div class="mt-8 flex justify-center gap-6">
+<button class="font-label-caps text-label-caps text-on-primary/70 hover:text-on-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="language">language</span>
+                English
+            </button>
+<span class="text-on-primary/20">|</span>
+<button class="font-label-caps text-label-caps text-on-primary/70 hover:text-on-primary transition-colors">المساعدة</button>
+<button class="font-label-caps text-label-caps text-on-primary/70 hover:text-on-primary transition-colors">الشروط والأحكام</button>
+</div>
+</main>
+<!-- Decoration Element: Soft Blur Circle -->
+<div class="fixed top-[-10%] right-[-5%] w-[400px] h-[400px] bg-secondary-container/10 rounded-full blur-[100px] z-0"></div>
+<div class="fixed bottom-[-10%] left-[-5%] w-[300px] h-[300px] bg-primary-fixed/10 rounded-full blur-[80px] z-0"></div>
+</body></html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#006d37",
+                        "on-secondary": "#ffffff",
+                        "outline": "#6f7975",
+                        "primary": "#004335",
+                        "surface-bright": "#f7faf7",
+                        "surface-container": "#ecefeb",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#a9f1d9",
+                        "surface": "#f7faf7",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-high": "#e6e9e6",
+                        "on-error": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#e0e3e0",
+                        "tertiary-fixed": "#ffdad4",
+                        "on-surface-variant": "#3f4945",
+                        "on-surface": "#191c1b",
+                        "surface-dim": "#d8dbd8",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#e0e3e0",
+                        "surface-tint": "#206a57",
+                        "on-secondary-container": "#00743a",
+                        "surface-container-low": "#f2f4f1",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#8ed4bd",
+                        "tertiary": "#612920",
+                        "on-tertiary-fixed": "#390b06",
+                        "tertiary-container": "#7d3f35",
+                        "primary-container": "#0a5c4a",
+                        "inverse-surface": "#2d312f",
+                        "on-primary-container": "#8bd2bb",
+                        "background": "#f7faf7",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#4ae183",
+                        "tertiary-fixed-dim": "#ffb4a7",
+                        "secondary-container": "#6bfe9c",
+                        "secondary-fixed": "#6bfe9c",
+                        "on-tertiary-fixed-variant": "#71352c",
+                        "on-background": "#191c1b",
+                        "outline-variant": "#bfc9c3",
+                        "inverse-primary": "#8ed4bd",
+                        "on-tertiary-container": "#ffb0a3",
+                        "inverse-on-surface": "#eff1ee",
+                        "on-secondary-fixed-variant": "#005228",
+                        "on-primary-fixed": "#002018",
+                        "on-primary-fixed-variant": "#005140",
+                        "on-secondary-fixed": "#00210c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "container-padding": "20px",
+                        "card-gap": "20px",
+                        "gutter": "16px",
+                        "section-margin": "32px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["IBM Plex Sans"],
+                        "body-sm": ["IBM Plex Sans"],
+                        "label-caps": ["IBM Plex Sans"],
+                        "title-sm": ["IBM Plex Sans"],
+                        "display-lg-mobile": ["IBM Plex Sans"],
+                        "headline-md": ["IBM Plex Sans"],
+                        "body-lg": ["IBM Plex Sans"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["34px", {"lineHeight": "42px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "display-lg-mobile": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "26px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-32">
+<!-- Top AppBar -->
+<header class="fixed top-0 left-0 right-0 z-50 flex flex-row-reverse justify-between items-center px-container-padding w-full h-16 bg-surface/80 backdrop-blur-md shadow-[0px_10px_30px_rgba(0,92,74,0.05)]">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-fixed shadow-sm">
+<img alt="User Profile" data-alt="A professional headshot of a middle-aged male doctor with a warm smile, wearing a clean white lab coat over a dark shirt. The lighting is soft and studio-quality, creating a high-end medical professional aesthetic. The background is a clean, minimalist medical office with subtle green accents, reflecting a calm and reliable healthcare environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKGgUSc0RnJkkzgmqtxnE4uAt8L0SC1HhU9xiTUK1CLK-O9YKkOZSSlw29dlx0EFk2wTNDJ0zEyqDV10w7clbR4nzIYKpELgomNsGH4oLeG2iEWKM7UgEkuNJlC2uAk-uAiICNkBgP-pvmaNQHXy0d0YK-NxsexYUP5He0Y_SYSTqqc6scNBBPSSzHB41RAUHfJqSJMWTRz5wBqlzNlt7dS1MFqvifU68YwRU66YgN3BKYL5ssYw_I6kNiLgG0dx6bAJWaD1P02iZm"/>
+</div>
+<span class="font-display-lg-mobile text-display-lg-mobile text-primary font-bold tracking-tight">أخضر</span>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-primary-container/10 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined text-primary">settings</span>
+</button>
+</header>
+<main class="pt-20 px-container-padding flex flex-col gap-card-gap">
+<!-- Search Section -->
+<section class="mt-4">
+<div class="relative group">
+<div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline">search</span>
+</div>
+<input class="w-full h-14 pr-12 pl-4 rounded-full bg-surface-container-lowest border border-outline-variant/30 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all shadow-sm" placeholder="ابحث عن طبيب أو تخصص..." type="text"/>
+</div>
+</section>
+<!-- Doctor Info Card -->
+<div class="bg-surface-container-lowest rounded-[20px] p-5 flex gap-4 border border-primary/10 shadow-[0px_10px_30px_rgba(0,92,74,0.05)]">
+<div class="w-20 h-20 rounded-2xl overflow-hidden bg-primary-fixed/30 shrink-0">
+<img class="w-full h-full object-cover" data-alt="A professional closeup of a smiling female doctor in a white lab coat with a stethoscope around her neck. The setting is a bright, modern clinic with a palette of soft whites and deep forest greens. High-key lighting highlights her professional and trustworthy expression, embodying a sense of high-end medical care." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtpr2lXZ1BqkcrDhl9T21EqWDOKRohbuzRblmAfNJ8O5XX8aCtW_nQdXy1PLwJKfL5zvX0cYyGiyEMQydl4iKTFAt_MhNAvxJ3u927Ekh6cEYRceAvAtM1hMufSCAf-TorI2eL17J0wWmJwO2HCC9_1gRIlLRxCcGKW8fRGYwpbb0KvztpoRN2LtnVoJ3_1EPREVqLO1oLljLGtDnvSznEidOnSmpyX_KriqS_5enY2KTC8Ebv-4aPg_vGKtYmnWxm4WBwOBLUfFg-"/>
+</div>
+<div class="flex flex-col justify-center gap-1">
+<h2 class="font-headline-md-mobile text-headline-md-mobile text-primary">د. سارة الأحمد</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">استشاري أمراض القلب والأوعية الدموية</p>
+<div class="flex items-center gap-2 mt-1">
+<div class="flex items-center gap-1 bg-secondary/10 px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px] text-secondary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-caps text-label-caps text-secondary">4.9</span>
+</div>
+<span class="font-label-caps text-label-caps text-outline">120+ تقييم</span>
+</div>
+</div>
+</div>
+<!-- Modern Calendar Picker -->
+<section class="flex flex-col gap-4">
+<div class="flex justify-between items-center">
+<h3 class="font-title-sm text-title-sm text-primary">اختر التاريخ</h3>
+<span class="font-body-sm text-body-sm text-secondary font-medium">أكتوبر 2023</span>
+</div>
+<div class="flex gap-3 overflow-x-auto pb-2 -mx-2 px-2 no-scrollbar">
+<!-- Days List -->
+<div class="flex flex-col items-center justify-center min-w-[64px] h-24 rounded-2xl bg-primary text-on-primary shadow-lg active:scale-95 transition-all cursor-pointer">
+<span class="font-label-caps text-label-caps opacity-80 mb-1">السبت</span>
+<span class="font-headline-md-mobile text-headline-md-mobile">14</span>
+</div>
+<div class="flex flex-col items-center justify-center min-w-[64px] h-24 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 text-on-surface hover:bg-surface-container-high transition-all cursor-pointer">
+<span class="font-label-caps text-label-caps text-outline mb-1">الأحد</span>
+<span class="font-headline-md-mobile text-headline-md-mobile">15</span>
+</div>
+<div class="flex flex-col items-center justify-center min-w-[64px] h-24 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 text-on-surface hover:bg-surface-container-high transition-all cursor-pointer">
+<span class="font-label-caps text-label-caps text-outline mb-1">الاثنين</span>
+<span class="font-headline-md-mobile text-headline-md-mobile">16</span>
+</div>
+<div class="flex flex-col items-center justify-center min-w-[64px] h-24 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 text-on-surface hover:bg-surface-container-high transition-all cursor-pointer">
+<span class="font-label-caps text-label-caps text-outline mb-1">الثلاثاء</span>
+<span class="font-headline-md-mobile text-headline-md-mobile">17</span>
+</div>
+<div class="flex flex-col items-center justify-center min-w-[64px] h-24 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 text-on-surface hover:bg-surface-container-high transition-all cursor-pointer">
+<span class="font-label-caps text-label-caps text-outline mb-1">الأربعاء</span>
+<span class="font-headline-md-mobile text-headline-md-mobile">18</span>
+</div>
+</div>
+</section>
+<!-- Duration Picker -->
+<section class="flex flex-col gap-3">
+<h3 class="font-title-sm text-title-sm text-primary">مدة الجلسة</h3>
+<div class="flex gap-3">
+<button class="flex-1 py-3 rounded-full bg-primary-fixed/30 border border-primary/20 text-primary font-bold transition-all">
+<span class="font-body-sm text-body-sm">30 دقيقة</span>
+</button>
+<button class="flex-1 py-3 rounded-full bg-surface-container-lowest border border-outline-variant/30 text-on-surface-variant hover:bg-surface-container-high transition-all">
+<span class="font-body-sm text-body-sm">60 دقيقة</span>
+</button>
+</div>
+</section>
+<!-- Time Slots Grid -->
+<section class="flex flex-col gap-4">
+<div class="flex justify-between items-center">
+<h3 class="font-title-sm text-title-sm text-primary">المواعيد المتاحة</h3>
+<div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-error-container/40 border border-error/10">
+<span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+<span class="font-label-caps text-label-caps text-error">مكتظ تقريباً</span>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-3">
+<button class="py-3 rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-on-surface-variant hover:border-primary/40 hover:bg-primary-fixed/10 transition-all active:scale-95">
+<span class="font-body-lg text-body-lg">09:00</span>
+</button>
+<button class="py-3 rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-on-surface-variant hover:border-primary/40 hover:bg-primary-fixed/10 transition-all active:scale-95">
+<span class="font-body-lg text-body-lg">10:30</span>
+</button>
+<button class="py-3 rounded-xl bg-primary text-on-primary shadow-md active:scale-95">
+<span class="font-body-lg text-body-lg">11:15</span>
+</button>
+<button class="py-3 rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-on-surface-variant opacity-40 cursor-not-allowed">
+<span class="font-body-lg text-body-lg">12:00</span>
+</button>
+<button class="py-3 rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-on-surface-variant hover:border-primary/40 hover:bg-primary-fixed/10 transition-all active:scale-95">
+<span class="font-body-lg text-body-lg">02:30</span>
+</button>
+<button class="py-3 rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-on-surface-variant hover:border-primary/40 hover:bg-primary-fixed/10 transition-all active:scale-95">
+<span class="font-body-lg text-body-lg">04:00</span>
+</button>
+</div>
+</section>
+<!-- Booking Button Wrapper -->
+<div class="mt-4">
+<button class="w-full py-5 rounded-full bg-primary text-on-primary font-bold shadow-[0px_10px_30px_rgba(0,67,53,0.3)] hover:bg-primary-container transition-all active:scale-95 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">check_circle</span>
+<span class="font-title-sm text-title-sm">تأكيد الحجز</span>
+</button>
+</div>
+</main>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-4 left-0 right-0 z-50 flex flex-row-reverse justify-around items-center w-auto mx-container-padding h-20 bg-surface-container-lowest/90 backdrop-blur-lg rounded-full border border-outline-variant/20 shadow-[0px_10px_30px_rgba(0,92,74,0.15)]">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-all active:scale-90 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-caps text-label-caps mt-1">الرئيسية</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary bg-primary-fixed/20 rounded-xl p-2 shadow-[0px_0px_20px_rgba(0,109,55,0.3)]" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-label-caps text-label-caps mt-1">المواعيد</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-all active:scale-90 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="medical_services">medical_services</span>
+<span class="font-label-caps text-label-caps mt-1">السجل</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-all active:scale-90 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="font-label-caps text-label-caps mt-1">التنبيهات</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-all active:scale-90 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-caps text-label-caps mt-1">الملف</span>
+</a>
+</nav>
+</body></html>
