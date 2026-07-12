@@ -7,11 +7,11 @@ import { AuthButton } from '../../src/components/AuthButton';
 import { useAuth } from '../../src/context/AuthContext';
 import { typography } from '../../src/theme/typography';
 import { colors } from '../../src/theme/colors';
-import { MaterialIcons } from '@expo/vector-icons';
+import { ApiError, getApiErrorMessage } from '../../src/api/client';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { login, isLoading } = useAuth();
+  const { login, loginDashboard, isLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
@@ -28,10 +28,28 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     if (!validate()) return;
     try {
-      await login();
+      await login({ login: email.trim(), password });
       router.replace('/(tabs)');
     } catch (e) {
-      Alert.alert('خطأ', 'فشل تسجيل الدخول');
+      if (e instanceof ApiError && e.status === 403) {
+        try {
+          await loginDashboard({ login: email.trim(), password });
+          router.replace('/dashboard' as never);
+          return;
+        } catch (dashboardError) {
+          Alert.alert('ط®ط·ط£', getApiErrorMessage(dashboardError));
+          return;
+        }
+      }
+
+      if (e instanceof ApiError && e.fields) {
+        setErrors({
+          email: e.fields.login ?? e.fields.email,
+          password: e.fields.password,
+        });
+      }
+
+      Alert.alert('خطأ', getApiErrorMessage(e));
     }
   };
 

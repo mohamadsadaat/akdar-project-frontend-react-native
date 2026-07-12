@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import BottomTabBar from '@/src/components/BottomTabBar';
+import { BottomTabBar } from '@/src/components/BottomTabBar';
 
 export default function TabLayout() {
   return (

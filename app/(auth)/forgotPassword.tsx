@@ -6,6 +6,8 @@ import { AuthInput } from '../../src/components/AuthInput';
 import { AuthButton } from '../../src/components/AuthButton';
 import { typography } from '../../src/theme/typography';
 import { colors } from '../../src/theme/colors';
+import { authApi } from '../../src/api/auth';
+import { getApiErrorMessage } from '../../src/api/client';
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
@@ -29,15 +31,19 @@ export default function ForgotPasswordScreen() {
   const handleSend = async () => {
     if (!validate()) return;
     setIsLoading(true);
-    // Simulate network request
-    setTimeout(() => {
+
+    try {
+      await authApi.forgotPassword(email.trim());
       setIsLoading(false);
       Alert.alert(
         'تم الإرسال',
         'تم إرسال تعليمات إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.',
         [{ text: 'حسناً', onPress: () => router.replace('/(auth)/login') }]
       );
-    }, 1500);
+    } catch (e) {
+      setIsLoading(false);
+      Alert.alert('خطأ', getApiErrorMessage(e));
+    }
   };
 
   return (

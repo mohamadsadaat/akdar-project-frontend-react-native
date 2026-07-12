@@ -1,14 +1,29 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, I18nManager } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Alert, View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, I18nManager } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { colors } from '@/src/theme/colors';
 import { typography } from '@/src/theme/typography';
 import { spacing, radius } from '@/src/theme/spacing';
 import { shadows } from '@/src/theme/shadows';
-import { mockData } from '@/src/data/mockData';
+import { patientApi } from '@/src/api/patient';
+import { getApiErrorMessage } from '@/src/api/client';
+import { EmptyState, ErrorState, LoadingState } from '@/src/components/DataState';
+import { NotificationCardData, notificationToCard } from '@/src/utils/apiMappers';
+import { useAuth } from '@/src/context/AuthContext';
+import { avatarSource } from '@/src/utils/images';
 
 // Extracted Notification Card component
-const NotificationCard = ({ notification, isRTL, textAlignment }: any) => {
+const NotificationCard = ({
+  notification,
+  isRTL,
+  textAlignment,
+  onPress,
+}: {
+  notification: NotificationCardData;
+  isRTL: boolean;
+  textAlignment: 'right' | 'left';
+  onPress: () => void;
+}) => {
   const getIconStyle = () => {
     switch (notification.type) {
       case 'primary': return { bg: 'rgba(169, 241, 217, 0.3)', color: colors.primary }; // primary-fixed/30
@@ -22,6 +37,7 @@ const NotificationCard = ({ notification, isRTL, textAlignment }: any) => {
 
   return (
     <TouchableOpacity 
+      onPress={onPress}
       style={[
         styles.notificationCard, 
         notification.isUnread ? styles.unreadCard : styles.readCard,
@@ -33,7 +49,7 @@ const NotificationCard = ({ notification, isRTL, textAlignment }: any) => {
       )}
       
       <View style={[styles.iconContainer, { backgroundColor: iconStyle.bg }]}>
-        <Feather name={notification.icon} size={24} color={iconStyle.color} />
+        <Feather name={notification.icon as any} size={24} color={iconStyle.color} />
       </View>
       
       <View style={styles.cardContent}>
@@ -50,10 +66,55 @@ const NotificationCard = ({ notification, isRTL, textAlignment }: any) => {
 export default function NotificationsScreen() {
   const isRTL = I18nManager.isRTL;
   const textAlignment = isRTL ? 'right' : 'left';
-  const [notifications, setNotifications] = useState(mockData.recentAlerts);
+  const { user } = useAuth();
+  const [notifications, setNotifications] = useState<NotificationCardData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isMarkingAll, setIsMarkingAll] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, isUnread: false })));
+  const loadNotifications = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await patientApi.getNotifications();
+      setNotifications(response.data.map(notificationToCard));
+    } catch (e) {
+      setError(getApiErrorMessage(e));
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadNotifications();
+  }, [loadNotifications]);
+
+  const markAllAsRead = async () => {
+    setIsMarkingAll(true);
+
+    try {
+      await patientApi.markAllNotificationsRead();
+      setNotifications((items) => items.map((item) => ({ ...item, isUnread: false })));
+    } catch (e) {
+      Alert.alert('خطأ', getApiErrorMessage(e));
+    } finally {
+      setIsMarkingAll(false);
+    }
+  };
+
+  const markOneAsRead = async (id: string) => {
+    const current = notifications.find((notification) => notification.id === id);
+    if (!current?.isUnread) return;
+
+    setNotifications((items) => items.map((item) => item.id === id ? { ...item, isUnread: false } : item));
+
+    try {
+      await patientApi.markNotificationRead(id);
+    } catch (e) {
+      Alert.alert('خطأ', getApiErrorMessage(e));
+      void loadNotifications();
+    }
   };
 
   return (
@@ -66,7 +127,7 @@ export default function NotificationsScreen() {
             <Feather name="settings" size={24} color={colors.primary} />
           </TouchableOpacity>
           <View style={styles.avatarContainer}>
-            <Image source={{ uri: mockData.user.avatar }} style={styles.avatar} />
+            <Image source={avatarSource(user?.avatar_url)} style={styles.avatar} />
           </View>
         </View>
       </View>
@@ -75,39 +136,35 @@ export default function NotificationsScreen() {
         {/* Section Header */}
         <View style={[styles.sectionHeader, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           <Text style={styles.title}>التنبيهات</Text>
-          <TouchableOpacity style={[styles.markReadButton, { flexDirection: isRTL ? 'row-reverse' : 'row' }]} onPress={markAllAsRead}>
-            <Text style={styles.markReadText}>تحديد كـ مقروء الكل</Text>
+          <TouchableOpacity
+            style={[styles.markReadButton, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
+            onPress={markAllAsRead}
+            disabled={isMarkingAll || notifications.length === 0}
+          >
+            <Text style={styles.markReadText}>{isMarkingAll ? 'جاري التحديث...' : 'تحديد الكل كمقروء'}</Text>
             <Feather name="check-circle" size={16} color={colors.secondary} />
           </TouchableOpacity>
         </View>
 
         {/* Notifications List */}
         <View style={styles.listContainer}>
-          {/* Item 1 */}
-          <NotificationCard notification={notifications[0]} isRTL={isRTL} textAlignment={textAlignment} />
-          
-          {/* Item 2 */}
-          <NotificationCard notification={notifications[1]} isRTL={isRTL} textAlignment={textAlignment} />
-          
-          {/* Item 3 */}
-          <NotificationCard notification={notifications[2]} isRTL={isRTL} textAlignment={textAlignment} />
-
-          {/* Promo Card */}
-          <View style={styles.promoCard}>
-            <Image 
-              source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD2bhGvnGQEPrnL0TmXaUGGgW84Xmzh7rpTE7-Zk8s6VjKTb88JN3spBT67xyYloTcMJZUAAOKJU4qja8h7jM7Zp-mgCKO6RGbdzYcNGDQFDbZyG3SzDZfn2oz0VLwnFW67auoPX7ZNwJ38zr_5_9VNK4CHVT_7D_4ehT-mwOAHRx1X_AFwpOF7PubPnoXodYJ-xgnXooPS8-0VecfHGnIMsjGIykO4YAcF5ByqcYOWlZSx14OFbcl1DiDwK33y0xYoyb2B6ZIjGgAN' }} 
-              style={styles.promoImage} 
-            />
-            <View style={[styles.promoOverlay, isRTL ? { paddingRight: 32 } : { paddingLeft: 32 }]}>
-              <View style={[styles.promoContent, isRTL ? { alignItems: 'flex-end' } : { alignItems: 'flex-start' }]}>
-                <Text style={styles.promoTitle}>خدمة جديدة</Text>
-                <Text style={[styles.promoSubtitle, { textAlign: textAlignment }]}>احجز استشارتك المرئية الآن مع كبار الأطباء.</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Item 4 */}
-          <NotificationCard notification={notifications[3]} isRTL={isRTL} textAlignment={textAlignment} />
+          {isLoading ? (
+            <LoadingState />
+          ) : error ? (
+            <ErrorState message={error} onRetry={loadNotifications} />
+          ) : notifications.length === 0 ? (
+            <EmptyState title="لا توجد تنبيهات" />
+          ) : (
+            notifications.map((notification) => (
+              <NotificationCard
+                key={notification.id}
+                notification={notification}
+                isRTL={isRTL}
+                textAlignment={textAlignment}
+                onPress={() => markOneAsRead(notification.id)}
+              />
+            ))
+          )}
         </View>
       </ScrollView>
     </View>
@@ -241,37 +298,5 @@ const styles = StyleSheet.create({
     ...typography.bodySm,
     color: colors.textLight,
     lineHeight: 22,
-  },
-  promoCard: {
-    width: '100%',
-    height: 192, // h-48
-    borderRadius: 20,
-    overflow: 'hidden',
-    ...shadows.soft,
-    marginVertical: spacing.md,
-    position: 'relative',
-  },
-  promoImage: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
-  },
-  promoOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 67, 53, 0.7)', // Gradient simulation
-    justifyContent: 'center',
-  },
-  promoContent: {
-    maxWidth: 200,
-  },
-  promoTitle: {
-    ...typography.headlineMd,
-    color: colors.onPrimary,
-    marginBottom: spacing.xs,
-  },
-  promoSubtitle: {
-    ...typography.bodySm,
-    color: colors.onPrimary,
-    opacity: 0.9,
   },
 });

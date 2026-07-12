@@ -6,15 +6,20 @@ import { typography } from '../theme/typography';
 import { spacing, radius } from '../theme/spacing';
 import { shadows } from '../theme/shadows';
 import { Card } from './Card';
+import { avatarSource } from '../utils/images';
 
 export interface AppointmentProps {
   id: string;
+  doctorId: number | null;
   doctor: string;
   specialty: string;
   date: string;
   time: string;
+  startsAt: string;
+  durationMinutes: number;
+  reason: string | null;
   status: 'confirmed' | 'pending' | 'completed' | 'cancelled';
-  image: string;
+  image: string | null;
 }
 
 interface AppointmentCardProps {
@@ -47,7 +52,7 @@ export const AppointmentCard: React.FC<AppointmentCardProps> = ({ appointment, s
     <Card style={[styles.card, style]}>
       <View style={styles.cardContent}>
         <View style={styles.imageContainer}>
-          <Image source={{ uri: appointment.image }} style={styles.image} />
+          <Image source={avatarSource(appointment.image)} style={styles.image} />
         </View>
         <View style={styles.detailsContainer}>
           <View style={styles.headerRow}>

@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal, View, StyleSheet, TouchableOpacity, Text, TouchableWithoutFeedback } from 'react-native';
 import { colors } from '../theme/colors';
 import { typography } from '../theme/typography';
-import { spacing, radius } from '../theme/spacing';
+import { spacing } from '../theme/spacing';
 import { shadows } from '../theme/shadows';
 import { Feather } from '@expo/vector-icons';
 

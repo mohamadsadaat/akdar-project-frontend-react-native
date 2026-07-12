@@ -1,17 +1,35 @@
 import { Card } from '@/src/components/Card';
-import { mockData } from '@/src/data/mockData';
+import { EmptyState, ErrorState, LoadingState } from '@/src/components/DataState';
+import { getApiErrorMessage } from '@/src/api/client';
+import { patientApi } from '@/src/api/patient';
+import { ApiMedicalRecord, ApiPrescription } from '@/src/api/types';
 import { colors } from '@/src/theme/colors';
 import { shadows } from '@/src/theme/shadows';
 import { radius, spacing } from '@/src/theme/spacing';
 import { typography } from '@/src/theme/typography';
+import { formatDate } from '@/src/utils/format';
+import { avatarSource } from '@/src/utils/images';
+import { useAuth } from '@/src/context/AuthContext';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { I18nManager, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+type MedicalRecordItem = ApiMedicalRecord & {
+  prescription: ApiPrescription | null;
+};
+
 // Extracted TimelineItem component
-const TimelineItem = ({ record, isLast, isRTL, textAlignment }: any) => {
+const TimelineItem = ({ record, isRTL, textAlignment }: {
+  record: MedicalRecordItem;
+  isLast: boolean;
+  isRTL: boolean;
+  textAlignment: 'right' | 'left';
+}) => {
   const [expanded, setExpanded] = useState(false);
+  const attachments = record.attachments ?? [];
+  const hasPrescription = Boolean(record.prescription);
+  const hasAttachment = attachments.length > 0;
 
   const getTagStyle = () => {
     switch (record.type) {
@@ -24,6 +42,9 @@ const TimelineItem = ({ record, isLast, isRTL, textAlignment }: any) => {
 
   const tagStyle = getTagStyle();
   const IconComponent = ({ name }: { name: any }) => <Feather name={name} size={18} color={colors.onSurfaceVariant} />;
+  const doctorName = record.doctor
+    ? `${record.doctor.name}${record.doctor.specialty?.name_ar ? ` - ${record.doctor.specialty.name_ar}` : ''}`
+    : 'طبيب غير محدد';
 
   return (
     <View style={[styles.timelineItem, { paddingRight: isRTL ? 48 : 0, paddingLeft: isRTL ? 0 : 48 }]}>
@@ -39,42 +60,48 @@ const TimelineItem = ({ record, isLast, isRTL, textAlignment }: any) => {
         <View style={styles.cardHeader}>
           <View style={styles.headerContent}>
             <View style={[styles.tag, { backgroundColor: tagStyle.bg }]}>
-              <Text style={[styles.tagText, { color: tagStyle.text }]}>{record.tag}</Text>
+              <Text style={[styles.tagText, { color: tagStyle.text }]}>{record.type}</Text>
             </View>
             <Text style={[styles.recordTitle, { textAlign: textAlignment }]}>{record.title}</Text>
           </View>
-          <Text style={styles.recordDate}>{record.date}</Text>
+          <Text style={styles.recordDate}>{formatDate(record.recorded_at)}</Text>
         </View>
 
         <View style={styles.recordDetails}>
           <View style={[styles.detailRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             <IconComponent name="user" />
-            <Text style={[styles.detailText, { textAlign: textAlignment }]}>{record.doctor}</Text>
+            <Text style={[styles.detailText, { textAlign: textAlignment }]}>{doctorName}</Text>
           </View>
           <View style={[styles.detailRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-            <IconComponent name={record.type === 'vaccine' ? "shield" : "map-pin"} />
-            <Text style={[styles.detailText, { textAlign: textAlignment }]}>{record.location}</Text>
+            <IconComponent name="map-pin" />
+            <Text style={[styles.detailText, { textAlign: textAlignment }]}>{record.facility?.name ?? 'منشأة غير محددة'}</Text>
           </View>
+          {record.diagnosis && (
+            <View style={[styles.detailRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+              <IconComponent name="clipboard" />
+              <Text style={[styles.detailText, { textAlign: textAlignment }]}>{record.diagnosis}</Text>
+            </View>
+          )}
         </View>
 
         {/* Footer Actions */}
-        {(record.hasPrescription || record.hasAttachment) && (
+        {(hasPrescription || hasAttachment) && (
           <View style={[styles.cardFooter, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-            {record.hasPrescription && (
+            {hasPrescription && (
               <TouchableOpacity style={[styles.actionButton, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
                 <Feather name="file-text" size={20} color={colors.primary} />
                 <Text style={styles.actionText}>الوصفة الطبية</Text>
               </TouchableOpacity>
             )}
             
-            {record.hasAttachment && (
+            {hasAttachment && (
               <TouchableOpacity style={[styles.attachmentButton, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
                 <Feather name="paperclip" size={14} color={colors.primary} />
-                <Text style={styles.attachmentText}>{record.attachmentName}</Text>
+                <Text style={styles.attachmentText}>{attachments[0]?.original_name}</Text>
               </TouchableOpacity>
             )}
 
-            {record.hasPrescription && (
+            {hasPrescription && (
               <TouchableOpacity 
                 style={styles.expandButton}
                 onPress={() => setExpanded(!expanded)}
@@ -85,12 +112,12 @@ const TimelineItem = ({ record, isLast, isRTL, textAlignment }: any) => {
           </View>
         )}
         
-        {/* Expanded Content (mock) */}
-        {expanded && record.hasPrescription && (
+        {expanded && record.prescription && (
           <View style={styles.expandedContent}>
             <Text style={[styles.detailText, { textAlign: textAlignment, color: colors.text }]}>
-              - بانادول أدفانس (500 ملغ) 3 مرات يومياً{'\n'}
-              - قطرة أنف محلول ملحي
+              {record.prescription.items.map((item) => (
+                `- ${item.medicine_name}${item.dose ? ` (${item.dose})` : ''}${item.frequency ? ` ${item.frequency}` : ''}`
+              )).join('\n')}
             </Text>
           </View>
         )}
@@ -103,6 +130,36 @@ export default function HealthRecordScreen() {
   const isRTL = I18nManager.isRTL;
   const textAlignment = isRTL ? 'right' : 'left';
   const router = useRouter();
+  const { user, profile } = useAuth();
+  const [records, setRecords] = useState<MedicalRecordItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const allergies = profile?.allergies?.map((allergy) => allergy.name).join('، ') || 'لا يوجد';
+
+  const loadRecords = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await patientApi.getMedicalRecords();
+      const enrichedRecords = await Promise.all(
+        response.data.map(async (record) => {
+          const detailedRecord = await patientApi.getMedicalRecord(record.id).catch(() => record);
+          const prescription = await patientApi.getPrescription(record.id).catch(() => null);
+          return { ...detailedRecord, prescription };
+        }),
+      );
+      setRecords(enrichedRecords);
+    } catch (e) {
+      setError(getApiErrorMessage(e));
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadRecords();
+  }, [loadRecords]);
 
   return (
     <View style={styles.container}>
@@ -114,7 +171,7 @@ export default function HealthRecordScreen() {
             <Feather name="settings" size={24} color={colors.primary} />
           </TouchableOpacity>
           <View style={styles.avatarContainer}>
-            <Image source={{ uri: mockData.user.avatar }} style={styles.avatar} />
+            <Image source={avatarSource(profile?.avatar_url ?? user?.avatar_url)} style={styles.avatar} />
           </View>
         </View>
       </View>
@@ -133,12 +190,12 @@ export default function HealthRecordScreen() {
           <View style={styles.statCard}>
             <Feather name="heart" size={24} color={colors.secondary} />
             <Text style={[styles.statLabel, { textAlign: textAlignment }]}>فصيلة الدم</Text>
-            <Text style={[styles.statValue, { textAlign: textAlignment }]}>O+ إيجابي</Text>
+            <Text style={[styles.statValue, { textAlign: textAlignment }]}>{profile?.blood_type ?? 'غير محدد'}</Text>
           </View>
           <View style={styles.statCard}>
             <Feather name="alert-triangle" size={24} color={colors.error} />
             <Text style={[styles.statLabel, { textAlign: textAlignment }]}>الحساسية</Text>
-            <Text style={[styles.statValue, { textAlign: textAlignment }]}>البنسلين</Text>
+            <Text style={[styles.statValue, { textAlign: textAlignment }]}>{allergies}</Text>
           </View>
         </View>
 
@@ -147,15 +204,23 @@ export default function HealthRecordScreen() {
           {/* Timeline Line */}
           <View style={[styles.timelineLine, isRTL ? { right: 28 } : { left: 28 }]} />
           
-          {mockData.healthRecords.map((record, index) => (
-            <TimelineItem 
-              key={record.id} 
-              record={record} 
-              isLast={index === mockData.healthRecords.length - 1}
-              isRTL={isRTL}
-              textAlignment={textAlignment}
-            />
-          ))}
+          {isLoading ? (
+            <LoadingState />
+          ) : error ? (
+            <ErrorState message={error} onRetry={loadRecords} />
+          ) : records.length === 0 ? (
+            <EmptyState title="لا توجد سجلات صحية" message="سيظهر هنا أي سجل طبي يضاف من العيادة." />
+          ) : (
+            records.map((record, index) => (
+              <TimelineItem
+                key={record.id}
+                record={record}
+                isLast={index === records.length - 1}
+                isRTL={isRTL}
+                textAlignment={textAlignment}
+              />
+            ))
+          )}
         </View>
       </ScrollView>
 

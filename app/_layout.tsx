@@ -16,7 +16,7 @@ if (Platform.OS === 'web' && typeof document !== 'undefined') {
 }
 
 function RootNavigation() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
@@ -24,20 +24,28 @@ function RootNavigation() {
     if (isLoading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
+    const inDashboard = (segments as string[])[0] === 'dashboard';
     const isSplash = (segments as string[]).length === 0;
+
+    if (inDashboard) {
+      return;
+    }
 
     if (!isAuthenticated && !inAuthGroup && !isSplash) {
       // Redirect to the login page.
       router.replace('/(auth)/login');
+    } else if (isAuthenticated && user?.role !== 'patient') {
+      router.replace('/dashboard' as never);
     } else if (isAuthenticated && (inAuthGroup || isSplash)) {
       // Redirect away from the login page.
       router.replace('/(tabs)');
     }
-  }, [isAuthenticated, segments, isLoading, router]);
+  }, [isAuthenticated, segments, isLoading, router, user?.role]);
 
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen name="index" />
+      <Stack.Screen name="dashboard" options={{ animation: 'fade' }} />
       <Stack.Screen name="(auth)" options={{ animation: 'fade' }} />
       <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
     </Stack>

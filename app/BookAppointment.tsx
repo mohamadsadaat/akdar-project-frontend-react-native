@@ -1,37 +1,178 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, TextInput, I18nManager } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Alert, View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, TextInput, I18nManager } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { colors } from '@/src/theme/colors';
 import { typography } from '@/src/theme/typography';
 import { spacing, radius } from '@/src/theme/spacing';
 import { shadows } from '@/src/theme/shadows';
+import { patientApi } from '@/src/api/patient';
+import { getApiErrorMessage } from '@/src/api/client';
+import { ApiDoctor } from '@/src/api/types';
+import { EmptyState, ErrorState, LoadingState } from '@/src/components/DataState';
+import { addDays, formatDate, formatTime, toDateInputValue } from '@/src/utils/format';
+import { avatarSource } from '@/src/utils/images';
+
+const getParam = (value?: string | string[]) => (Array.isArray(value) ? value[0] : value);
+
+const getDateInputFromParam = (value?: string) => {
+  if (!value) {
+    return toDateInputValue(new Date());
+  }
+
+  const parsedDate = new Date(value);
+  return Number.isNaN(parsedDate.getTime()) ? toDateInputValue(new Date()) : toDateInputValue(parsedDate);
+};
 
 export default function BookAppointmentScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{
+    mode?: string;
+    appointmentId?: string;
+    doctorId?: string;
+    startsAt?: string;
+    duration?: string;
+    reason?: string;
+  }>();
   const isRTL = I18nManager.isRTL;
   const textAlignment = isRTL ? 'right' : 'left';
+  const mode = getParam(params.mode);
+  const appointmentId = getParam(params.appointmentId);
+  const startsAtParam = getParam(params.startsAt);
+  const reasonParam = getParam(params.reason);
+  const doctorIdParam = Number(getParam(params.doctorId));
+  const durationParam = Number(getParam(params.duration));
+  const rescheduleDoctorId = Number.isFinite(doctorIdParam) && doctorIdParam > 0 ? doctorIdParam : null;
+  const initialDuration = durationParam === 60 ? 60 : 30;
+  const isRescheduling = mode === 'reschedule' && Boolean(appointmentId);
 
-  const [selectedDate, setSelectedDate] = useState(16);
-  const [duration, setDuration] = useState(30);
-  const [selectedTime, setSelectedTime] = useState('11:15');
+  const [search, setSearch] = useState('');
+  const [doctors, setDoctors] = useState<ApiDoctor[]>([]);
+  const [selectedDoctorId, setSelectedDoctorId] = useState<number | null>(rescheduleDoctorId);
+  const [selectedDate, setSelectedDate] = useState(getDateInputFromParam(startsAtParam));
+  const [duration, setDuration] = useState(initialDuration);
+  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [reason, setReason] = useState(reasonParam ?? '');
+  const [isLoadingDoctors, setIsLoadingDoctors] = useState(true);
+  const [doctorsError, setDoctorsError] = useState<string | null>(null);
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
+  const [slotsError, setSlotsError] = useState<string | null>(null);
+  const [slots, setSlots] = useState<string[]>([]);
+  const [isBooking, setIsBooking] = useState(false);
 
-  const dates = [
-    { day: 'السبت', date: 14 },
-    { day: 'الأحد', date: 15 },
-    { day: 'الاثنين', date: 16 },
-    { day: 'الثلاثاء', date: 17 },
-    { day: 'الأربعاء', date: 18 },
-  ];
+  const selectedDoctor = doctors.find((doctor) => doctor.id === selectedDoctorId) ?? null;
 
-  const timeSlots = [
-    { time: '09:00', status: 'available' },
-    { time: '10:30', status: 'available' },
-    { time: '11:15', status: 'available' },
-    { time: '12:00', status: 'disabled' },
-    { time: '02:30', status: 'available' },
-    { time: '04:00', status: 'available' },
-  ];
+  const dates = useMemo(() => {
+    const today = new Date();
+    return Array.from({ length: 7 }, (_, index) => {
+      const date = addDays(today, index);
+      return {
+        value: toDateInputValue(date),
+        day: new Intl.DateTimeFormat('ar-SY', { weekday: 'long' }).format(date),
+        date: new Intl.DateTimeFormat('ar-SY', { day: 'numeric' }).format(date),
+      };
+    });
+  }, []);
+
+  const loadDoctors = useCallback(async () => {
+    setIsLoadingDoctors(true);
+    setDoctorsError(null);
+
+    try {
+      const response = await patientApi.getDoctors({
+        search: isRescheduling ? undefined : search.trim() || undefined,
+        per_page: 20,
+      });
+      setDoctors(response.data);
+      setSelectedDoctorId((currentId) => (
+        (isRescheduling ? rescheduleDoctorId : currentId) &&
+        response.data.some((doctor) => doctor.id === (isRescheduling ? rescheduleDoctorId : currentId))
+          ? (isRescheduling ? rescheduleDoctorId : currentId)
+          : response.data[0]?.id ?? null
+      ));
+    } catch (e) {
+      setDoctorsError(getApiErrorMessage(e));
+    } finally {
+      setIsLoadingDoctors(false);
+    }
+  }, [isRescheduling, rescheduleDoctorId, search]);
+
+  const loadAvailability = useCallback(async () => {
+    if (!selectedDoctorId) {
+      setSlots([]);
+      setSelectedSlot(null);
+      return;
+    }
+
+    setIsLoadingSlots(true);
+    setSlotsError(null);
+
+    try {
+      const response = await patientApi.getDoctorAvailability(selectedDoctorId, selectedDate, duration);
+      setSlots(response.slots);
+      setSelectedSlot(response.slots[0] ?? null);
+    } catch (e) {
+      setSlots([]);
+      setSelectedSlot(null);
+      setSlotsError(getApiErrorMessage(e));
+    } finally {
+      setIsLoadingSlots(false);
+    }
+  }, [duration, selectedDate, selectedDoctorId]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      void loadDoctors();
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [loadDoctors]);
+
+  useEffect(() => {
+    void loadAvailability();
+  }, [loadAvailability]);
+
+  const handleBook = async () => {
+    if (!selectedDoctorId || !selectedSlot) {
+      Alert.alert('تنبيه', 'اختر الطبيب والوقت المناسب قبل تأكيد الحجز.');
+      return;
+    }
+
+    if (isRescheduling && !appointmentId) {
+      Alert.alert('تعذر إعادة الجدولة', 'لا يوجد رقم موعد صالح لإعادة جدولته.');
+      return;
+    }
+
+    setIsBooking(true);
+
+    try {
+      const payload = {
+        starts_at: selectedSlot,
+        duration_minutes: duration,
+        reason: reason.trim() || undefined,
+      };
+
+      if (isRescheduling && appointmentId) {
+        await patientApi.rescheduleAppointment(appointmentId, payload);
+      } else {
+        await patientApi.createAppointment({
+          doctor_id: selectedDoctorId,
+          ...payload,
+        });
+      }
+
+      Alert.alert(
+        isRescheduling ? 'تمت إعادة الجدولة' : 'تم الحجز',
+        isRescheduling ? 'تم تحديث موعدك بنجاح.' : 'تم إرسال طلب موعدك بنجاح.',
+        [
+          { text: 'حسناً', onPress: () => router.replace('/(tabs)/appointments') },
+      ]);
+    } catch (e) {
+      Alert.alert('خطأ', getApiErrorMessage(e));
+    } finally {
+      setIsBooking(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -40,56 +181,109 @@ export default function BookAppointmentScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Feather name={isRTL ? "chevron-right" : "chevron-left"} size={28} color={colors.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>حجز موعد جديد</Text>
-        <View style={{ width: 28 }} /> {/* Spacer for alignment */}
+        <Text style={styles.headerTitle}>{isRescheduling ? 'إعادة جدولة الموعد' : 'حجز موعد جديد'}</Text>
+        <View style={{ width: 28 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Search Section */}
-        <View style={styles.searchContainer}>
-          <Feather name="search" size={20} color={colors.outline} style={styles.searchIcon} />
-          <TextInput 
-            style={[styles.searchInput, { textAlign: textAlignment }]} 
-            placeholder="ابحث عن طبيب أو تخصص..."
-            placeholderTextColor={colors.outlineVariant}
-          />
-        </View>
-
-        {/* Doctor Info Card */}
-        <View style={[styles.doctorCard, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-          <View style={styles.doctorImageContainer}>
-            <Image 
-              source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBtpr2lXZ1BqkcrDhl9T21EqWDOKRohbuzRblmAfNJ8O5XX8aCtW_nQdXy1PLwJKfL5zvX0cYyGiyEMQydl4iKTFAt_MhNAvxJ3u927Ekh6cEYRceAvAtM1hMufSCAf-TorI2eL17J0wWmJwO2HCC9_1gRIlLRxCcGKW8fRGYwpbb0KvztpoRN2LtnVoJ3_1EPREVqLO1oLljLGtDnvSznEidOnSmpyX_KriqS_5enY2KTC8Ebv-4aPg_vGKtYmnWxm4WBwOBLUfFg-' }} 
-              style={styles.doctorImage} 
+        {!isRescheduling && (
+          <View style={styles.searchContainer}>
+            <Feather name="search" size={20} color={colors.outline} style={styles.searchIcon} />
+            <TextInput
+              style={[styles.searchInput, { textAlign: textAlignment }]}
+              placeholder="ابحث عن طبيب أو تخصص..."
+              placeholderTextColor={colors.outlineVariant}
+              value={search}
+              onChangeText={setSearch}
             />
           </View>
-          <View style={styles.doctorInfo}>
-            <Text style={[styles.doctorName, { textAlign: textAlignment }]}>د. سارة الأحمد</Text>
-            <Text style={[styles.doctorSpecialty, { textAlign: textAlignment }]}>استشاري أمراض القلب والأوعية الدموية</Text>
-            <View style={[styles.ratingContainer, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-              <View style={[styles.ratingBadge, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-                <Feather name="star" size={14} color={colors.secondary} />
-                <Text style={styles.ratingText}>4.9</Text>
-              </View>
-              <Text style={styles.reviewsText}>120+ تقييم</Text>
+        )}
+
+        {/* Doctor Picker */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { textAlign: textAlignment, marginBottom: spacing.md }]}>
+            {isRescheduling ? 'الطبيب الحالي' : 'اختر الطبيب'}
+          </Text>
+          {isRescheduling && (
+            <View style={[styles.lockedDoctorNotice, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+              <Feather name="lock" size={16} color={colors.primary} />
+              <Text style={[styles.lockedDoctorNoticeText, { textAlign: textAlignment }]}>
+                إعادة الجدولة تكون مع نفس الطبيب.
+              </Text>
             </View>
-          </View>
+          )}
+          {isLoadingDoctors ? (
+            <LoadingState label="جاري تحميل الأطباء..." />
+          ) : doctorsError ? (
+            <ErrorState message={doctorsError} onRetry={loadDoctors} />
+          ) : doctors.length === 0 ? (
+            <EmptyState title="لا يوجد أطباء مطابقون" />
+          ) : (
+            <View style={styles.doctorsList}>
+              {doctors.map((doctor) => {
+                const isSelected = doctor.id === selectedDoctorId;
+                return (
+                  <TouchableOpacity
+                    key={doctor.id}
+                    style={[
+                      styles.doctorCard,
+                      { flexDirection: isRTL ? 'row-reverse' : 'row' },
+                      isSelected && styles.selectedDoctorCard,
+                    ]}
+                    onPress={() => {
+                      if (!isRescheduling) {
+                        setSelectedDoctorId(doctor.id);
+                      }
+                    }}
+                    disabled={isRescheduling}
+                  >
+                    <View style={styles.doctorImageContainer}>
+                      <Image source={avatarSource(doctor.avatar_url)} style={styles.doctorImage} />
+                    </View>
+                    <View style={styles.doctorInfo}>
+                      <Text style={[styles.doctorName, { textAlign: textAlignment }]}>{doctor.name}</Text>
+                      <Text style={[styles.doctorSpecialty, { textAlign: textAlignment }]}>
+                        {doctor.specialty?.name_ar ?? doctor.facility?.name ?? 'تخصص غير محدد'}
+                      </Text>
+                      <View style={[styles.ratingContainer, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+                        <View style={[styles.ratingBadge, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+                          <Feather name="star" size={14} color={colors.secondary} />
+                          <Text style={styles.ratingText}>{doctor.rating_average.toFixed(1)}</Text>
+                        </View>
+                        <Text style={styles.reviewsText}>{doctor.reviews_count}+ تقييم</Text>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          )}
         </View>
+
+        {selectedDoctor && (
+          <View style={styles.selectedDoctorHint}>
+            <Feather name="map-pin" size={16} color={colors.primary} />
+            <Text style={[styles.selectedDoctorHintText, { textAlign: textAlignment }]}>
+              {selectedDoctor.facility?.name ?? 'منشأة غير محددة'}
+            </Text>
+          </View>
+        )}
 
         {/* Modern Calendar Picker */}
         <View style={styles.section}>
           <View style={[styles.sectionHeader, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             <Text style={styles.sectionTitle}>اختر التاريخ</Text>
-            <Text style={styles.monthText}>أكتوبر 2023</Text>
+            <Text style={styles.monthText}>{formatDate(selectedDate, false)}</Text>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.datesContainer, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             {dates.map((item) => {
-              const isSelected = selectedDate === item.date;
+              const isSelected = selectedDate === item.value;
               return (
                 <TouchableOpacity
-                  key={item.date}
+                  key={item.value}
                   style={[styles.dateBox, isSelected && styles.selectedDateBox]}
-                  onPress={() => setSelectedDate(item.date)}
+                  onPress={() => setSelectedDate(item.value)}
                 >
                   <Text style={[styles.dayText, isSelected && styles.selectedDayText]}>{item.day}</Text>
                   <Text style={[styles.dateText, isSelected && styles.selectedDateText]}>{item.date}</Text>
@@ -124,41 +318,75 @@ export default function BookAppointmentScreen() {
             <Text style={styles.sectionTitle}>المواعيد المتاحة</Text>
             <View style={[styles.busyBadge, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
               <View style={styles.busyDot} />
-              <Text style={styles.busyText}>مكتظ تقريباً</Text>
+              <Text style={styles.busyText}>{slots.length > 0 ? `${slots.length} وقت متاح` : 'لا يوجد'}</Text>
             </View>
           </View>
-          <View style={[styles.timeGrid, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-            {timeSlots.map((slot) => {
-              const isSelected = selectedTime === slot.time;
-              const isDisabled = slot.status === 'disabled';
-              return (
-                <TouchableOpacity
-                  key={slot.time}
-                  disabled={isDisabled}
-                  style={[
-                    styles.timeBox,
-                    isSelected && styles.selectedTimeBox,
-                    isDisabled && styles.disabledTimeBox
-                  ]}
-                  onPress={() => setSelectedTime(slot.time)}
-                >
-                  <Text style={[
-                    styles.timeText,
-                    isSelected && styles.selectedTimeText,
-                    isDisabled && styles.disabledTimeText
-                  ]}>
-                    {slot.time}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
+
+          {isLoadingSlots ? (
+            <LoadingState label="جاري تحميل الأوقات..." />
+          ) : slotsError ? (
+            <ErrorState message={slotsError} onRetry={loadAvailability} />
+          ) : slots.length === 0 ? (
+            <EmptyState title="لا توجد مواعيد متاحة لهذا اليوم" />
+          ) : (
+            <View style={[styles.timeGrid, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+              {slots.map((slot) => {
+                const isSelected = selectedSlot === slot;
+                return (
+                  <TouchableOpacity
+                    key={slot}
+                    style={[
+                      styles.timeBox,
+                      isSelected && styles.selectedTimeBox,
+                    ]}
+                    onPress={() => setSelectedSlot(slot)}
+                  >
+                    <Text style={[
+                      styles.timeText,
+                      isSelected && styles.selectedTimeText,
+                    ]}>
+                      {formatTime(slot)}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          )}
+        </View>
+
+        {/* Reason */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { textAlign: textAlignment, marginBottom: spacing.md }]}>سبب الزيارة</Text>
+          <TextInput
+            style={[styles.reasonInput, { textAlign: textAlignment }]}
+            placeholder="اكتب سبب الحجز بشكل مختصر..."
+            placeholderTextColor={colors.outlineVariant}
+            value={reason}
+            onChangeText={setReason}
+            multiline
+          />
         </View>
 
         {/* Booking Button */}
-        <TouchableOpacity style={[styles.bookButton, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+        <TouchableOpacity
+          style={[
+            styles.bookButton,
+            { flexDirection: isRTL ? 'row-reverse' : 'row' },
+            (!selectedSlot || isBooking) && styles.disabledBookButton,
+          ]}
+          disabled={!selectedSlot || isBooking}
+          onPress={handleBook}
+        >
           <Feather name="check-circle" size={20} color={colors.onPrimary} />
-          <Text style={styles.bookButtonText}>تأكيد الحجز</Text>
+          <Text style={styles.bookButtonText}>
+            {isBooking
+              ? isRescheduling
+                ? 'جاري إعادة الجدولة...'
+                : 'جاري تأكيد الحجز...'
+              : isRescheduling
+                ? 'تأكيد إعادة الجدولة'
+                : 'تأكيد الحجز'}
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </View>
@@ -221,6 +449,42 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(0, 67, 53, 0.1)',
     ...shadows.soft,
     marginBottom: spacing.xl,
+  },
+  doctorsList: {
+    gap: spacing.md,
+  },
+  lockedDoctorNotice: {
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: 'rgba(169, 241, 217, 0.2)',
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  lockedDoctorNoticeText: {
+    ...typography.bodySm,
+    color: colors.primary,
+    flex: 1,
+  },
+  selectedDoctorCard: {
+    borderColor: colors.primary,
+    borderWidth: 2,
+  },
+  selectedDoctorHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: 'rgba(169, 241, 217, 0.2)',
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    marginBottom: spacing.xl,
+  },
+  selectedDoctorHintText: {
+    ...typography.bodySm,
+    color: colors.primary,
+    flex: 1,
   },
   doctorImageContainer: {
     width: 80,
@@ -381,9 +645,6 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
     ...shadows.soft,
   },
-  disabledTimeBox: {
-    opacity: 0.4,
-  },
   timeText: {
     ...typography.bodyLg,
     color: colors.textLight,
@@ -391,8 +652,16 @@ const styles = StyleSheet.create({
   selectedTimeText: {
     color: colors.onPrimary,
   },
-  disabledTimeText: {
-    color: colors.outline,
+  reasonInput: {
+    minHeight: 96,
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(191, 201, 195, 0.3)',
+    padding: spacing.md,
+    ...typography.bodyLg,
+    color: colors.text,
+    textAlignVertical: 'top',
   },
   bookButton: {
     width: '100%',
@@ -408,5 +677,8 @@ const styles = StyleSheet.create({
   bookButtonText: {
     ...typography.titleSm,
     color: colors.onPrimary,
+  },
+  disabledBookButton: {
+    opacity: 0.5,
   },
 });

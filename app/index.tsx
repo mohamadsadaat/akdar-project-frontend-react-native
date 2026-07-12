@@ -11,12 +11,11 @@ export default function SplashScreen() {
   const { isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
-    // Simulate splash duration then navigate based on auth state.
     const timer = setTimeout(() => {
       if (!isLoading) {
         router.replace(isAuthenticated ? '/(tabs)' : '/(auth)/login');
       }
-    }, 2000); // 2 seconds splash
+    }, 1200);
     return () => clearTimeout(timer);
   }, [isAuthenticated, isLoading, router]);
 

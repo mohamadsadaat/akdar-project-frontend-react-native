@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View, Text, ScrollView, Image, Pressable, I18nManager } from 'react-native';
 import { Screen } from '@/src/components/Screen';
 import { typography } from '@/src/theme/typography';
@@ -6,15 +6,46 @@ import { spacing, radius } from '@/src/theme/spacing';
 import { colors } from '@/src/theme/colors';
 import { shadows } from '@/src/theme/shadows';
 import Feather from '@expo/vector-icons/Feather';
-import { mockData } from '@/src/data/mockData';
 import { useRouter } from 'expo-router';
+import { patientApi } from '@/src/api/patient';
+import { getApiErrorMessage } from '@/src/api/client';
+import { DashboardResponse } from '@/src/api/types';
+import { EmptyState, ErrorState, LoadingState } from '@/src/components/DataState';
+import { appointmentToCard, notificationToCard } from '@/src/utils/apiMappers';
+import { formatNumber } from '@/src/utils/format';
+import { avatarSource } from '@/src/utils/images';
 
 export default function HomeScreen() {
   const isRTL = I18nManager.isRTL;
   const router = useRouter();
+  const [dashboard, setDashboard] = useState<DashboardResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // We are forcing text alignment based on language direction
   const textAlignment = isRTL ? 'right' : 'left';
+  const upcomingAppointment = dashboard?.upcoming_appointment
+    ? appointmentToCard(dashboard.upcoming_appointment)
+    : null;
+  const notifications = dashboard?.recent_notifications.map(notificationToCard) ?? [];
+
+  const loadDashboard = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const data = await patientApi.getDashboard();
+      setDashboard(data);
+    } catch (e) {
+      setError(getApiErrorMessage(e));
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadDashboard();
+  }, [loadDashboard]);
 
   return (
     <Screen safeArea>
@@ -23,7 +54,7 @@ export default function HomeScreen() {
         <View style={styles.headerLeft}>
           <View style={styles.avatarContainer}>
             <Image 
-              source={{ uri: mockData.user.avatar }} 
+              source={avatarSource(dashboard?.user.avatar_url)}
               style={styles.avatar} 
             />
           </View>
@@ -40,112 +71,137 @@ export default function HomeScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Welcome Section */}
-        <View style={styles.section}>
-          <Text style={[styles.welcomeText, { textAlign: textAlignment }]}>أهلاً بك، {mockData.user.name}</Text>
-          <Text style={[styles.welcomeSubText, { textAlign: textAlignment }]}>نتمنى لك يوماً صحياً مليئاً بالنشاط</Text>
-        </View>
-
-        {/* Upcoming Appointment Card */}
-        <View style={styles.appointmentCard}>
-          <View style={styles.appointmentHeader}>
-            <View style={styles.appointmentBadge}>
-              <Text style={styles.appointmentBadgeText}>موعد قادم</Text>
+        {isLoading ? (
+          <LoadingState />
+        ) : error ? (
+          <ErrorState message={error} onRetry={loadDashboard} />
+        ) : (
+          <>
+            {/* Welcome Section */}
+            <View style={styles.section}>
+              <Text style={[styles.welcomeText, { textAlign: textAlignment }]}>
+                أهلاً بك، {dashboard?.user.name ?? 'زائر'}
+              </Text>
+              <Text style={[styles.welcomeSubText, { textAlign: textAlignment }]}>نتمنى لك يوماً صحياً مليئاً بالنشاط</Text>
             </View>
-          </View>
-          
-          <View style={styles.appointmentDetails}>
-            <View>
-              <Text style={[styles.doctorName, { textAlign: textAlignment }]}>{mockData.upcomingAppointment.doctor}</Text>
-              <Text style={[styles.specialty, { textAlign: textAlignment }]}>{mockData.upcomingAppointment.specialty}</Text>
-              
-              <View style={styles.dateTimeContainer}>
-                <View style={styles.dateTimeItem}>
-                  <Feather name="calendar" size={16} color={colors.surface} />
-                  <Text style={styles.dateTimeText}>{mockData.upcomingAppointment.date}</Text>
-                </View>
-                <View style={styles.dateTimeItem}>
-                  <Feather name="clock" size={16} color={colors.surface} />
-                  <Text style={styles.dateTimeText}>{mockData.upcomingAppointment.time}</Text>
+
+            {/* Upcoming Appointment Card */}
+            <View style={styles.appointmentCard}>
+              <View style={styles.appointmentHeader}>
+                <View style={styles.appointmentBadge}>
+                  <Text style={styles.appointmentBadgeText}>موعد قادم</Text>
                 </View>
               </View>
-            </View>
-            
-            <View style={styles.appointmentIconContainer}>
-              <Feather name="file-text" size={32} color={colors.primaryLight} />
-            </View>
-          </View>
-        </View>
 
-        {/* Quick Actions Grid */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { textAlign: textAlignment }]}>الوصول السريع</Text>
-          <View style={styles.quickActionsGrid}>
-            <QuickAction icon="calendar" label="حجز موعد" />
-            <QuickAction icon="folder" label="السجل الصحي" />
-            <QuickAction icon="file-text" label="الوصفات" />
-            <QuickAction icon="activity" label="القياسات" />
-            <QuickAction icon="bell" label="التنبيهات" />
-            <QuickAction icon="plus-square" label="الأدوية" />
-          </View>
-        </View>
+              {upcomingAppointment ? (
+                <View style={styles.appointmentDetails}>
+                  <View style={styles.appointmentTextBlock}>
+                    <Text style={[styles.doctorName, { textAlign: textAlignment }]}>{upcomingAppointment.doctor}</Text>
+                    <Text style={[styles.specialty, { textAlign: textAlignment }]}>{upcomingAppointment.specialty}</Text>
 
-        {/* Health Summary (Bento Style) */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { textAlign: textAlignment }]}>ملخص النشاط</Text>
-          <View style={styles.bentoGrid}>
-            <View style={[styles.bentoItem, styles.bentoSteps]}>
-              <Feather name="activity" size={24} color={colors.secondary} />
-              <View>
-                <Text style={[styles.bentoValue, { color: colors.primary, textAlign: textAlignment }]}>{mockData.activitySummary.steps}</Text>
-                <Text style={[styles.bentoLabel, { textAlign: textAlignment }]}>خطوة اليوم</Text>
-              </View>
-            </View>
-            
-            <View style={[styles.bentoItem, styles.bentoHeart]}>
-              <Feather name="heart" size={24} color={colors.error} />
-              <View>
-                <Text style={[styles.bentoValue, { color: colors.error, textAlign: textAlignment }]}>{mockData.activitySummary.heartRate}</Text>
-                <Text style={[styles.bentoLabel, { textAlign: textAlignment }]}>نبض القلب</Text>
-              </View>
-            </View>
-          </View>
-        </View>
+                    <View style={styles.dateTimeContainer}>
+                      <View style={styles.dateTimeItem}>
+                        <Feather name="calendar" size={16} color={colors.surface} />
+                        <Text style={styles.dateTimeText}>{upcomingAppointment.date}</Text>
+                      </View>
+                      <View style={styles.dateTimeItem}>
+                        <Feather name="clock" size={16} color={colors.surface} />
+                        <Text style={styles.dateTimeText}>{upcomingAppointment.time}</Text>
+                      </View>
+                    </View>
+                  </View>
 
-        {/* Recent Notifications */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>آخر التنبيهات</Text>
-            <Pressable>
-              <Text style={styles.seeAllText}>عرض الكل</Text>
-            </Pressable>
-          </View>
-          
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.notificationsList}
-          >
-            {mockData.recentAlerts.map((alert) => (
-              <View key={alert.id} style={styles.notificationCard}>
-                <View style={[
-                  styles.notificationIcon, 
-                  alert.type === 'primary' ? styles.notificationIconPrimary : styles.notificationIconSecondary
-                ]}>
-                  <Feather 
-                    name={alert.icon as any} 
-                    size={16} 
-                    color={alert.type === 'primary' ? colors.primary : colors.secondary} 
-                  />
+                  <View style={styles.appointmentIconContainer}>
+                    <Feather name="file-text" size={32} color={colors.primaryLight} />
+                  </View>
                 </View>
-                <View style={styles.notificationContent}>
-                  <Text style={[styles.notificationTitle, { textAlign: textAlignment }]}>{alert.title}</Text>
-                  <Text style={[styles.notificationMessage, { textAlign: textAlignment }]} numberOfLines={2}>{alert.message}</Text>
+              ) : (
+                <View style={styles.emptyAppointment}>
+                  <Text style={[styles.emptyAppointmentTitle, { textAlign: textAlignment }]}>لا يوجد موعد قادم</Text>
+                  <Text style={[styles.emptyAppointmentText, { textAlign: textAlignment }]}>يمكنك حجز موعد جديد من زر الإضافة.</Text>
+                </View>
+              )}
+            </View>
+
+            {/* Quick Actions Grid */}
+            <View style={styles.section}>
+              <Text style={[styles.sectionTitle, { textAlign: textAlignment }]}>الوصول السريع</Text>
+              <View style={styles.quickActionsGrid}>
+                <QuickAction icon="calendar" label="حجز موعد" />
+                <QuickAction icon="folder" label="السجل الصحي" />
+                <QuickAction icon="file-text" label="الوصفات" />
+                <QuickAction icon="activity" label="القياسات" />
+                <QuickAction icon="bell" label="التنبيهات" />
+                <QuickAction icon="plus-square" label="الأدوية" />
+              </View>
+            </View>
+
+            {/* Health Summary (Bento Style) */}
+            <View style={styles.section}>
+              <Text style={[styles.sectionTitle, { textAlign: textAlignment }]}>ملخص النشاط</Text>
+              <View style={styles.bentoGrid}>
+                <View style={[styles.bentoItem, styles.bentoSteps]}>
+                  <Feather name="activity" size={24} color={colors.secondary} />
+                  <View>
+                    <Text style={[styles.bentoValue, { color: colors.primary, textAlign: textAlignment }]}>
+                      {formatNumber(dashboard?.activity_summary.steps, 'لا يوجد')}
+                    </Text>
+                    <Text style={[styles.bentoLabel, { textAlign: textAlignment }]}>خطوة اليوم</Text>
+                  </View>
+                </View>
+
+                <View style={[styles.bentoItem, styles.bentoHeart]}>
+                  <Feather name="heart" size={24} color={colors.error} />
+                  <View>
+                    <Text style={[styles.bentoValue, { color: colors.error, textAlign: textAlignment }]}>
+                      {formatNumber(dashboard?.activity_summary.heart_rate, 'لا يوجد')}
+                    </Text>
+                    <Text style={[styles.bentoLabel, { textAlign: textAlignment }]}>نبض القلب</Text>
+                  </View>
                 </View>
               </View>
-            ))}
-          </ScrollView>
-        </View>
+            </View>
+
+            {/* Recent Notifications */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>آخر التنبيهات</Text>
+                <Pressable onPress={() => router.push('/(tabs)/notifications')}>
+                  <Text style={styles.seeAllText}>عرض الكل</Text>
+                </Pressable>
+              </View>
+
+              {notifications.length === 0 ? (
+                <EmptyState title="لا توجد تنبيهات جديدة" />
+              ) : (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.notificationsList}
+                >
+                  {notifications.map((alert) => (
+                    <View key={alert.id} style={styles.notificationCard}>
+                      <View style={[
+                        styles.notificationIcon,
+                        alert.type === 'primary' ? styles.notificationIconPrimary : styles.notificationIconSecondary
+                      ]}>
+                        <Feather
+                          name={alert.icon as any}
+                          size={16}
+                          color={alert.type === 'primary' ? colors.primary : colors.secondary}
+                        />
+                      </View>
+                      <View style={styles.notificationContent}>
+                        <Text style={[styles.notificationTitle, { textAlign: textAlignment }]}>{alert.title}</Text>
+                        <Text style={[styles.notificationMessage, { textAlign: textAlignment }]} numberOfLines={2}>{alert.message}</Text>
+                      </View>
+                    </View>
+                  ))}
+                </ScrollView>
+              )}
+            </View>
+          </>
+        )}
 
         {/* Extra padding for bottom nav & FAB */}
         <View style={{ height: 100 }} />
@@ -165,7 +221,7 @@ export default function HomeScreen() {
 
 // Helper component for Quick Actions
 const QuickAction = ({ icon, label }: { icon: any, label: string }) => {
-  const isRTL = I18nManager.isRTL;
+  const router = useRouter();
   const handlePress = () => {
     switch (icon) {
       case 'calendar':
@@ -282,6 +338,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+    gap: spacing.md,
+  },
+  appointmentTextBlock: {
+    flex: 1,
   },
   doctorName: {
     ...typography.titleSm,
@@ -315,6 +375,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(139, 210, 187, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  emptyAppointment: {
+    gap: spacing.xs,
+  },
+  emptyAppointmentTitle: {
+    ...typography.titleSm,
+    color: colors.surface,
+  },
+  emptyAppointmentText: {
+    ...typography.bodySm,
+    color: 'rgba(255,255,255,0.78)',
   },
   sectionTitle: {
     ...typography.titleSm,

@@ -1,32 +1,90 @@
 import { AppointmentCard, AppointmentProps } from '@/src/components/AppointmentCard';
 import { CustomModal } from '@/src/components/CustomModal';
-import { mockData } from '@/src/data/mockData';
 import { colors } from '@/src/theme/colors';
 import { shadows } from '@/src/theme/shadows';
 import { spacing } from '@/src/theme/spacing';
 import { typography } from '@/src/theme/typography';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { I18nManager, Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Alert, I18nManager, Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { patientApi } from '@/src/api/patient';
+import { getApiErrorMessage } from '@/src/api/client';
+import { appointmentToCard } from '@/src/utils/apiMappers';
+import { EmptyState, ErrorState, LoadingState } from '@/src/components/DataState';
+import { avatarSource } from '@/src/utils/images';
+import { useAuth } from '@/src/context/AuthContext';
 
 export default function AppointmentsScreen() {
   const isRTL = I18nManager.isRTL;
   const textAlignment = isRTL ? 'right' : 'left';
   const router = useRouter();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
+  const [appointments, setAppointments] = useState<AppointmentProps[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [cancelModalVisible, setCancelModalVisible] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentProps | null>(null);
+
+  const loadAppointments = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await patientApi.getAppointments(activeTab);
+      setAppointments(response.data.map(appointmentToCard));
+    } catch (e) {
+      setError(getApiErrorMessage(e));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    void loadAppointments();
+  }, [loadAppointments]);
 
   const handleCancelClick = (appointment: AppointmentProps) => {
     setSelectedAppointment(appointment);
     setCancelModalVisible(true);
   };
 
-  const confirmCancel = () => {
-    // In a real app, this would trigger an API call.
-    setCancelModalVisible(false);
-    setSelectedAppointment(null);
+  const handleRescheduleClick = (appointment: AppointmentProps) => {
+    if (!appointment.doctorId) {
+      Alert.alert('تعذر فتح إعادة الجدولة', 'لا توجد بيانات كافية عن الطبيب لهذا الموعد.');
+      return;
+    }
+
+    router.push({
+      pathname: '/BookAppointment',
+      params: {
+        mode: 'reschedule',
+        appointmentId: appointment.id,
+        doctorId: String(appointment.doctorId),
+        startsAt: appointment.startsAt,
+        duration: String(appointment.durationMinutes),
+        reason: appointment.reason ?? '',
+      },
+    });
+  };
+
+  const confirmCancel = async () => {
+    if (!selectedAppointment) return;
+
+    setIsCancelling(true);
+
+    try {
+      await patientApi.cancelAppointment(selectedAppointment.id);
+      setCancelModalVisible(false);
+      setSelectedAppointment(null);
+      await loadAppointments();
+    } catch (e) {
+      Alert.alert('خطأ', getApiErrorMessage(e));
+    } finally {
+      setIsCancelling(false);
+    }
   };
 
   return (
@@ -34,7 +92,7 @@ export default function AppointmentsScreen() {
       {/* TopAppBar */}
       <View style={styles.header}>
         <View style={styles.avatarContainer}>
-          <Image source={{ uri: mockData.user.avatar }} style={styles.avatar} />
+          <Image source={avatarSource(user?.avatar_url)} style={styles.avatar} />
         </View>
         <Text style={styles.headerTitle}>أخضر</Text>
         <TouchableOpacity style={styles.settingsButton}>
@@ -67,26 +125,40 @@ export default function AppointmentsScreen() {
 
         {/* Appointments List */}
         <View style={styles.listContainer}>
-          {mockData.appointments.map((appointment) => (
-            <View key={appointment.id}>
-              <AppointmentCard appointment={appointment as any} />
-              
-              {/* Actions for upcoming appointments */}
-              {activeTab === 'upcoming' && appointment.status !== 'cancelled' && (
-                <View style={[styles.actionButtons, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-                  <TouchableOpacity 
-                    style={styles.cancelButton}
-                    onPress={() => handleCancelClick(appointment as any)}
-                  >
-                    <Text style={styles.cancelButtonText}>إلغاء</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.rescheduleButton}>
-                    <Text style={styles.rescheduleButtonText}>إعادة جدولة</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-          ))}
+          {isLoading ? (
+            <LoadingState />
+          ) : error ? (
+            <ErrorState message={error} onRetry={loadAppointments} />
+          ) : appointments.length === 0 ? (
+            <EmptyState
+              title={activeTab === 'upcoming' ? 'لا توجد مواعيد قادمة' : 'لا توجد مواعيد سابقة'}
+              message={activeTab === 'upcoming' ? 'احجز موعدك الأول من زر الإضافة.' : undefined}
+            />
+          ) : (
+            appointments.map((appointment) => (
+              <View key={appointment.id}>
+                <AppointmentCard appointment={appointment} />
+
+                {/* Actions for upcoming appointments */}
+                {activeTab === 'upcoming' && appointment.status !== 'cancelled' && (
+                  <View style={[styles.actionButtons, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+                    <TouchableOpacity
+                      style={styles.cancelButton}
+                      onPress={() => handleCancelClick(appointment)}
+                    >
+                      <Text style={styles.cancelButtonText}>إلغاء</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.rescheduleButton}
+                      onPress={() => handleRescheduleClick(appointment)}
+                    >
+                      <Text style={styles.rescheduleButtonText}>إعادة جدولة</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+            ))
+          )}
         </View>
       </ScrollView>
 
@@ -123,8 +195,9 @@ export default function AppointmentsScreen() {
           <TouchableOpacity 
             style={styles.modalConfirmBtn}
             onPress={confirmCancel}
+            disabled={isCancelling}
           >
-            <Text style={styles.modalConfirmBtnText}>تأكيد الإلغاء</Text>
+            <Text style={styles.modalConfirmBtnText}>{isCancelling ? 'جاري الإلغاء...' : 'تأكيد الإلغاء'}</Text>
           </TouchableOpacity>
         </View>
       </CustomModal>

@@ -4,11 +4,14 @@ import { useRouter } from 'expo-router';
 import { AuthLayout } from '../../src/components/AuthLayout';
 import { AuthInput } from '../../src/components/AuthInput';
 import { AuthButton } from '../../src/components/AuthButton';
+import { useAuth } from '../../src/context/AuthContext';
 import { typography } from '../../src/theme/typography';
 import { colors } from '../../src/theme/colors';
+import { ApiError, getApiErrorMessage } from '../../src/api/client';
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const { register, isLoading } = useAuth();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -31,19 +34,41 @@ export default function RegisterScreen() {
     else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) newErrors.email = 'صيغة البريد غير صحيحة';
     if (!phone) newErrors.phone = 'رقم الجوال مطلوب';
     if (!password) newErrors.password = 'كلمة المرور مطلوبة';
-    if (password && password.length < 6) newErrors.password = 'يجب أن تكون كلمة المرور 6 خانات على الأقل';
+    if (password && password.length < 8) newErrors.password = 'يجب أن تكون كلمة المرور 8 خانات على الأقل';
     if (confirmPassword !== password) newErrors.confirmPassword = 'كلمتا المرور غير متطابقتين';
     if (!agree) newErrors.agree = 'يجب قبول الشروط';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!validate()) return;
-    // Simulate successful registration
-    Alert.alert('تم التسجيل', 'تم إنشاء حسابك بنجاح', [
-      { text: 'حسناً', onPress: () => router.replace('/(tabs)') },
-    ]);
+
+    try {
+      await register({
+        name: fullName.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        password,
+        password_confirmation: confirmPassword,
+        accepted_terms: agree,
+        terms_version: 'v1',
+      });
+      router.replace('/(tabs)');
+    } catch (e) {
+      if (e instanceof ApiError && e.fields) {
+        setErrors({
+          fullName: e.fields.name,
+          email: e.fields.email,
+          phone: e.fields.phone,
+          password: e.fields.password,
+          confirmPassword: e.fields.password_confirmation,
+          agree: e.fields.accepted_terms,
+        });
+      }
+
+      Alert.alert('خطأ', getApiErrorMessage(e));
+    }
   };
 
   return (
@@ -117,7 +142,7 @@ export default function RegisterScreen() {
       </View>
       {errors.agree && <Text style={{ color: colors.error, marginHorizontal: 4 }}>{errors.agree}</Text>}
 
-      <AuthButton title="إنشاء الحساب" onPress={handleRegister} variant="primary" />
+      <AuthButton title="إنشاء الحساب" onPress={handleRegister} isLoading={isLoading} variant="primary" />
       <View style={{ marginTop: 20, flexDirection: 'row', justifyContent: 'center' }}>
         <Text style={[typography.bodySm, { color: colors.onSurfaceVariant }]}>لديك حساب بالفعل؟ </Text>
         <Pressable onPress={() => router.replace('/(auth)/login')}>
