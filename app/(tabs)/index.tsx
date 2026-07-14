@@ -129,10 +129,10 @@ export default function HomeScreen() {
               <View style={styles.quickActionsGrid}>
                 <QuickAction icon="calendar" label="حجز موعد" />
                 <QuickAction icon="folder" label="السجل الصحي" />
-                <QuickAction icon="file-text" label="الوصفات" />
-                <QuickAction icon="activity" label="القياسات" />
+                {/* <QuickAction icon="file-text" label="الوصفات" /> */}
+                {/* <QuickAction icon="activity" label="القياسات" /> */}
                 <QuickAction icon="bell" label="التنبيهات" />
-                <QuickAction icon="plus-square" label="الأدوية" />
+                {/* <QuickAction icon="plus-square" label="الأدوية" /> */}
               </View>
             </View>
 

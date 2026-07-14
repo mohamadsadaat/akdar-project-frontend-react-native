@@ -26,6 +26,26 @@ import { colors } from '@/src/theme/colors';
 
 type TabKey = 'overview' | 'appointments' | 'patients' | 'schedule' | 'admin';
 
+type AdminDoctorForm = {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  specialty_id: string;
+  facility_id: string;
+  bio: string;
+};
+
+const emptyDoctorForm: AdminDoctorForm = {
+  name: '',
+  email: '',
+  phone: '',
+  password: 'Password123!',
+  specialty_id: '',
+  facility_id: '',
+  bio: '',
+};
+
 const statusLabels: Record<string, string> = {
   pending: 'بانتظار الموافقة',
   confirmed: 'مؤكد',
@@ -155,6 +175,8 @@ export default function DashboardScreen() {
   const [adminDoctors, setAdminDoctors] = useState<(DoctorOverview['doctor'] & { user?: unknown })[]>([]);
   const [catalogs, setCatalogs] = useState<Catalogs | null>(null);
   const [supportHint, setSupportHint] = useState<string>('');
+  const [doctorForm, setDoctorForm] = useState<AdminDoctorForm>(emptyDoctorForm);
+  const [isCreatingDoctor, setIsCreatingDoctor] = useState(false);
 
   const isDashboardUser = user?.role === 'doctor' || user?.role === 'admin';
   const isAdmin = user?.role === 'admin';
@@ -210,6 +232,11 @@ export default function DashboardScreen() {
         setAdminAppointments(appointments.data);
         setAdminDoctors(doctors.data);
         setCatalogs(nextCatalogs);
+        setDoctorForm((current) => ({
+          ...current,
+          specialty_id: current.specialty_id || String(nextCatalogs.specialties[0]?.id ?? ''),
+          facility_id: current.facility_id || String(nextCatalogs.facilities[0]?.id ?? ''),
+        }));
         setSupportHint(support.audit_log_hint);
       }
     } catch (e) {
@@ -314,6 +341,48 @@ export default function DashboardScreen() {
       await loadDashboard();
     } catch (e) {
       Alert.alert('تعذر تحديث الطبيب', getApiErrorMessage(e));
+    }
+  };
+
+  const createDoctor = async () => {
+    const selectedSpecialtyId = Number(doctorForm.specialty_id);
+    const selectedFacilityId = Number(doctorForm.facility_id);
+
+    if (!doctorForm.name.trim() || !doctorForm.email.trim() || !doctorForm.phone.trim()) {
+      Alert.alert('بيانات ناقصة', 'اكتب الاسم والبريد ورقم الهاتف قبل إضافة الطبيب.');
+      return;
+    }
+
+    if (!selectedSpecialtyId || !selectedFacilityId) {
+      Alert.alert('بيانات ناقصة', 'اختر اختصاصاً ومركزاً للطبيب.');
+      return;
+    }
+
+    setIsCreatingDoctor(true);
+
+    try {
+      await dashboardApi.createAdminDoctor({
+        name: doctorForm.name.trim(),
+        email: doctorForm.email.trim().toLowerCase(),
+        phone: doctorForm.phone.trim(),
+        password: doctorForm.password.trim() || undefined,
+        specialty_id: selectedSpecialtyId,
+        facility_id: selectedFacilityId,
+        bio: doctorForm.bio.trim() || undefined,
+        is_active: true,
+      });
+
+      setDoctorForm({
+        ...emptyDoctorForm,
+        specialty_id: String(selectedSpecialtyId),
+        facility_id: String(selectedFacilityId),
+      });
+      await loadDashboard();
+      Alert.alert('تمت الإضافة', 'تم إنشاء حساب الطبيب وإضافته إلى لوحة الإدارة.');
+    } catch (e) {
+      Alert.alert('تعذرت إضافة الطبيب', getApiErrorMessage(e));
+    } finally {
+      setIsCreatingDoctor(false);
     }
   };
 
@@ -522,6 +591,123 @@ export default function DashboardScreen() {
                 </View>
               ))}
             </View>
+
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>إضافة طبيب/مدرب</Text>
+              <View style={styles.doctorFormGrid}>
+                  <View style={styles.formField}>
+                    <Text style={styles.formLabel}>الاسم الكامل</Text>
+                    <TextInput
+                      value={doctorForm.name}
+                      onChangeText={(value) => setDoctorForm((current) => ({ ...current, name: value }))}
+                      placeholder="مثال: د. محمد الخطيب"
+                      style={styles.input}
+                    />
+                  </View>
+                  <View style={styles.formField}>
+                    <Text style={styles.formLabel}>البريد الإلكتروني</Text>
+                    <TextInput
+                      value={doctorForm.email}
+                      onChangeText={(value) => setDoctorForm((current) => ({ ...current, email: value }))}
+                      placeholder="doctor@akdar.test"
+                      style={styles.input}
+                      autoCapitalize="none"
+                      keyboardType="email-address"
+                    />
+                  </View>
+                  <View style={styles.formField}>
+                    <Text style={styles.formLabel}>رقم الهاتف</Text>
+                    <TextInput
+                      value={doctorForm.phone}
+                      onChangeText={(value) => setDoctorForm((current) => ({ ...current, phone: value }))}
+                      placeholder="+963991234567"
+                      style={styles.input}
+                      keyboardType="phone-pad"
+                    />
+                  </View>
+                  <View style={styles.formField}>
+                    <Text style={styles.formLabel}>كلمة المرور</Text>
+                    <TextInput
+                      value={doctorForm.password}
+                      onChangeText={(value) => setDoctorForm((current) => ({ ...current, password: value }))}
+                      placeholder="Password123!"
+                      style={styles.input}
+                      secureTextEntry
+                    />
+                  </View>
+                </View>
+
+                <View>
+                  <Text style={styles.formLabel}>الاختصاص</Text>
+                  <View style={styles.chipRow}>
+                    {catalogs?.specialties.map((specialty) => (
+                      <Pressable
+                        key={specialty.id}
+                        style={[
+                          styles.selectionChip,
+                          doctorForm.specialty_id === String(specialty.id) && styles.selectionChipActive,
+                        ]}
+                        onPress={() => setDoctorForm((current) => ({ ...current, specialty_id: String(specialty.id) }))}
+                      >
+                        <Text
+                          style={[
+                            styles.selectionChipText,
+                            doctorForm.specialty_id === String(specialty.id) && styles.selectionChipTextActive,
+                          ]}
+                        >
+                          {specialty.name_ar}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
+
+                <View>
+                  <Text style={styles.formLabel}>المركز</Text>
+                  <View style={styles.chipRow}>
+                    {catalogs?.facilities.map((facility) => (
+                      <Pressable
+                        key={facility.id}
+                        style={[
+                          styles.selectionChip,
+                          doctorForm.facility_id === String(facility.id) && styles.selectionChipActive,
+                        ]}
+                        onPress={() => setDoctorForm((current) => ({ ...current, facility_id: String(facility.id) }))}
+                      >
+                        <Text
+                          style={[
+                            styles.selectionChipText,
+                            doctorForm.facility_id === String(facility.id) && styles.selectionChipTextActive,
+                          ]}
+                        >
+                          {facility.name}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
+
+                <View>
+                  <Text style={styles.formLabel}>نبذة مختصرة</Text>
+                  <TextInput
+                    value={doctorForm.bio}
+                    onChangeText={(value) => setDoctorForm((current) => ({ ...current, bio: value }))}
+                    placeholder="نبذة تظهر في ملف الطبيب"
+                    style={[styles.input, styles.multilineInput]}
+                    multiline
+                  />
+                </View>
+
+                <View style={styles.formActions}>
+                  <Pressable
+                    style={[styles.actionButton, isCreatingDoctor && styles.actionButtonDisabled]}
+                    onPress={() => void createDoctor()}
+                    disabled={isCreatingDoctor}
+                  >
+                    <Text style={styles.actionText}>{isCreatingDoctor ? 'جاري الإضافة...' : 'إضافة الطبيب'}</Text>
+                  </Pressable>
+                </View>
+              </View>
 
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>المدربون/الأطباء</Text>
@@ -775,6 +961,58 @@ const styles = StyleSheet.create({
     color: colors.primary,
     textAlign: 'right',
   },
+  doctorFormGrid: {
+    flexDirection: 'row-reverse',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  formField: {
+    minWidth: 220,
+    flex: 1,
+    gap: 6,
+  },
+  formLabel: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: '700',
+    textAlign: 'right',
+    marginBottom: 6,
+  },
+  multilineInput: {
+    minHeight: 82,
+    paddingTop: 12,
+    textAlignVertical: 'top',
+  },
+  chipRow: {
+    flexDirection: 'row-reverse',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  selectionChip: {
+    minHeight: 34,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceContainerLow,
+    paddingHorizontal: 12,
+    justifyContent: 'center',
+  },
+  selectionChipActive: {
+    borderColor: colors.primary,
+    backgroundColor: colors.secondaryContainer,
+  },
+  selectionChipText: {
+    color: colors.textSecondary,
+    fontWeight: '700',
+    fontSize: 12,
+  },
+  selectionChipTextActive: {
+    color: colors.primary,
+  },
+  formActions: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'flex-start',
+  },
   subsectionTitle: {
     fontSize: 15,
     fontWeight: '800',
@@ -845,6 +1083,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     justifyContent: 'center',
     backgroundColor: colors.primary,
+  },
+  actionButtonDisabled: {
+    opacity: 0.65,
   },
   actionText: {
     color: colors.onPrimary,

@@ -9,6 +9,7 @@ import {
   PaginatedResponse,
 } from './types';
 
+
 export type DashboardStats = Record<string, number>;
 
 export type DoctorOverview = {
@@ -57,15 +58,47 @@ export type AdminUser = ApiUser & {
   patient_profile?: unknown;
   doctor?: ApiDoctor | null;
 };
+export type CreateSpecialtyPayload = {
+  name_ar: string;
+  description?: string;
+};
+
+export type CreateFacilityPayload = {
+  name: string;
+  type: string;
+  address?: string;
+  phone?: string;
+};
 
 export type Catalogs = {
   specialties: { id: number; name_ar: string; description: string | null }[];
   facilities: { id: number; name: string; type: string; address: string | null; phone: string | null; location: string | null }[];
 };
 
+export type CreateAdminDoctorPayload = {
+  name: string;
+  email: string;
+  phone: string;
+  password?: string;
+  specialty_id: number;
+  facility_id: number;
+  bio?: string;
+  is_active?: boolean;
+};
+
 export const dashboardApi = {
   async getDoctorOverview() {
     const response = await apiClient.get<DataResponse<DoctorOverview>>('/doctor-dashboard/overview');
+    return response.data.data;
+
+  },
+  async createSpecialty(payload: CreateSpecialtyPayload) {
+    const response = await apiClient.post<DataResponse<{ id: number; name_ar: string; description: string | null }>>('/admin-dashboard/specialties', payload);
+    return response.data.data;
+  },
+
+  async createFacility(payload: CreateFacilityPayload) {
+    const response = await apiClient.post<DataResponse<{ id: number; name: string; type: string; address: string | null; phone: string | null; location: string | null }>>('/admin-dashboard/facilities', payload);
     return response.data.data;
   },
 
@@ -145,6 +178,11 @@ export const dashboardApi = {
       params: { per_page: 50 },
     });
     return response.data;
+  },
+
+  async createAdminDoctor(payload: CreateAdminDoctorPayload) {
+    const response = await apiClient.post<DataResponse<ApiDoctor & { user?: ApiUser | null }>>('/admin-dashboard/doctors', payload);
+    return response.data.data;
   },
 
   async updateAdminDoctor(id: number, payload: { is_active?: boolean; bio?: string; full_name?: string }) {
