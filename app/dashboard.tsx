@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useAuth } from '@/src/context/AuthContext';
-import { ApiAppointment } from '@/src/api/types';
+import { ApiAppointment, ApiPatientSummary } from '@/src/api/types';
 import { getApiErrorMessage } from '@/src/api/client';
 import {
   AdminOverview,
@@ -36,6 +36,57 @@ type AdminDoctorForm = {
   bio: string;
 };
 
+type AdminSpecialtyForm = {
+  name_ar: string;
+  description: string;
+};
+
+type AdminFacilityForm = {
+  name: string;
+  type: string;
+  address: string;
+  phone: string;
+  location: string;
+};
+
+type AppointmentForm = {
+  patient_id: string;
+  starts_at: string;
+  duration_minutes: string;
+  status: 'pending' | 'confirmed';
+  reason: string;
+};
+
+type ScheduleRuleForm = {
+  weekday: string;
+  start_time: string;
+  end_time: string;
+  slot_duration_minutes: string;
+};
+
+type TimeOffForm = {
+  starts_at: string;
+  ends_at: string;
+  reason: string;
+};
+
+type PatientRecordForm = {
+  type: 'visit' | 'checkup' | 'vaccine';
+  title: string;
+  diagnosis: string;
+  notes: string;
+};
+
+type PatientVitalForm = {
+  type: string;
+  value: string;
+  unit: string;
+};
+
+type PatientProfileForm = {
+  blood_type: string;
+};
+
 const emptyDoctorForm: AdminDoctorForm = {
   name: '',
   email: '',
@@ -45,6 +96,66 @@ const emptyDoctorForm: AdminDoctorForm = {
   facility_id: '',
   bio: '',
 };
+
+const emptySpecialtyForm: AdminSpecialtyForm = {
+  name_ar: '',
+  description: '',
+};
+
+const emptyFacilityForm: AdminFacilityForm = {
+  name: '',
+  type: '',
+  address: '',
+  phone: '',
+  location: '',
+};
+
+const emptyAppointmentForm: AppointmentForm = {
+  patient_id: '',
+  starts_at: '',
+  duration_minutes: '30',
+  status: 'confirmed',
+  reason: '',
+};
+
+const emptyScheduleRuleForm: ScheduleRuleForm = {
+  weekday: '0',
+  start_time: '09:00',
+  end_time: '15:00',
+  slot_duration_minutes: '30',
+};
+
+const emptyTimeOffForm: TimeOffForm = {
+  starts_at: '',
+  ends_at: '',
+  reason: '',
+};
+
+const emptyPatientRecordForm: PatientRecordForm = {
+  type: 'visit',
+  title: '',
+  diagnosis: '',
+  notes: '',
+};
+
+const emptyPatientVitalForm: PatientVitalForm = {
+  type: '',
+  value: '',
+  unit: '',
+};
+
+const emptyPatientProfileForm: PatientProfileForm = {
+  blood_type: '',
+};
+
+const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+
+const vitalTypeOptions = [
+  { label: 'الطول', type: 'height', unit: 'cm' },
+  { label: 'الوزن', type: 'weight', unit: 'kg' },
+  { label: 'النبض', type: 'heart_rate', unit: 'bpm' },
+  { label: 'ضغط الدم', type: 'blood_pressure', unit: 'mmHg' },
+];
 
 const statusLabels: Record<string, string> = {
   pending: 'بانتظار الموافقة',
@@ -69,6 +180,30 @@ function toDateParam(date: Date) {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+function toDateTimeInput(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+function normalizeDateTime(value: string) {
+  return value.trim().replace(' ', 'T');
+}
+
+function latestVital(
+  patient: PatientDetails | null,
+  aliases: string[],
+) {
+  if (!patient) return null;
+
+  const normalizedAliases = aliases.map((alias) => alias.toLowerCase());
+
+  return patient.vitals.find((vital) => normalizedAliases.includes(vital.type.toLowerCase())) ?? null;
 }
 
 function StatCard({ label, value, icon }: { label: string; value: number | string; icon: React.ComponentProps<typeof Feather>['name'] }) {
@@ -167,6 +302,7 @@ export default function DashboardScreen() {
   const [error, setError] = useState<string | null>(null);
   const [doctorOverview, setDoctorOverview] = useState<DoctorOverview | null>(null);
   const [doctorAppointments, setDoctorAppointments] = useState<ApiAppointment[]>([]);
+  const [doctorPatients, setDoctorPatients] = useState<ApiPatientSummary[]>([]);
   const [schedule, setSchedule] = useState<DoctorSchedule | null>(null);
   const [selectedPatient, setSelectedPatient] = useState<PatientDetails | null>(null);
   const [adminOverview, setAdminOverview] = useState<AdminOverview | null>(null);
@@ -177,6 +313,27 @@ export default function DashboardScreen() {
   const [supportHint, setSupportHint] = useState<string>('');
   const [doctorForm, setDoctorForm] = useState<AdminDoctorForm>(emptyDoctorForm);
   const [isCreatingDoctor, setIsCreatingDoctor] = useState(false);
+  const [specialtyForm, setSpecialtyForm] = useState<AdminSpecialtyForm>(emptySpecialtyForm);
+  const [facilityForm, setFacilityForm] = useState<AdminFacilityForm>(emptyFacilityForm);
+  const [isCreatingSpecialty, setIsCreatingSpecialty] = useState(false);
+  const [isCreatingFacility, setIsCreatingFacility] = useState(false);
+  const [appointmentForm, setAppointmentForm] = useState<AppointmentForm>(() => {
+    const nextDate = new Date();
+    nextDate.setDate(nextDate.getDate() + 1);
+    nextDate.setHours(9, 0, 0, 0);
+    return { ...emptyAppointmentForm, starts_at: toDateTimeInput(nextDate) };
+  });
+  const [scheduleRuleForm, setScheduleRuleForm] = useState<ScheduleRuleForm>(emptyScheduleRuleForm);
+  const [timeOffForm, setTimeOffForm] = useState<TimeOffForm>(emptyTimeOffForm);
+  const [patientRecordForm, setPatientRecordForm] = useState<PatientRecordForm>(emptyPatientRecordForm);
+  const [patientVitalForm, setPatientVitalForm] = useState<PatientVitalForm>(emptyPatientVitalForm);
+  const [patientProfileForm, setPatientProfileForm] = useState<PatientProfileForm>(emptyPatientProfileForm);
+  const [isCreatingAppointment, setIsCreatingAppointment] = useState(false);
+  const [isUpdatingSchedule, setIsUpdatingSchedule] = useState(false);
+  const [isCreatingTimeOff, setIsCreatingTimeOff] = useState(false);
+  const [isCreatingPatientRecord, setIsCreatingPatientRecord] = useState(false);
+  const [isCreatingPatientVital, setIsCreatingPatientVital] = useState(false);
+  const [isUpdatingPatientProfile, setIsUpdatingPatientProfile] = useState(false);
 
   const isDashboardUser = user?.role === 'doctor' || user?.role === 'admin';
   const isAdmin = user?.role === 'admin';
@@ -208,14 +365,20 @@ export default function DashboardScreen() {
 
     try {
       if (isDoctor) {
-        const [overview, appointments, nextSchedule] = await Promise.all([
+        const [overview, appointments, nextSchedule, patients] = await Promise.all([
           dashboardApi.getDoctorOverview(),
           dashboardApi.getDoctorAppointments('all'),
           dashboardApi.getDoctorSchedule(),
+          dashboardApi.getDoctorPatients(),
         ]);
         setDoctorOverview(overview);
         setDoctorAppointments(appointments.data);
         setSchedule(nextSchedule);
+        setDoctorPatients(patients);
+        setAppointmentForm((current) => ({
+          ...current,
+          patient_id: current.patient_id || String(patients[0]?.id ?? ''),
+        }));
       }
 
       if (isAdmin) {
@@ -256,6 +419,181 @@ export default function DashboardScreen() {
       await loginDashboard({ login: login.trim(), password });
     } catch (e) {
       setLoginError(getApiErrorMessage(e));
+    }
+  };
+
+  const createAppointment = async () => {
+    const patientId = Number(appointmentForm.patient_id);
+    const duration = Number(appointmentForm.duration_minutes);
+
+    if (!patientId || !appointmentForm.starts_at.trim() || !duration) {
+      Alert.alert('بيانات ناقصة', 'اختر مريضاً وحدد وقت الموعد ومدته.');
+      return;
+    }
+
+    setIsCreatingAppointment(true);
+
+    try {
+      await dashboardApi.createDoctorAppointment({
+        patient_id: patientId,
+        starts_at: normalizeDateTime(appointmentForm.starts_at),
+        duration_minutes: duration,
+        status: appointmentForm.status,
+        reason: appointmentForm.reason.trim() || undefined,
+      });
+
+      setAppointmentForm((current) => ({ ...emptyAppointmentForm, patient_id: current.patient_id, starts_at: current.starts_at }));
+      await loadDashboard();
+      Alert.alert('تمت الإضافة', 'تم إنشاء الموعد وإضافته إلى جدولك.');
+    } catch (e) {
+      Alert.alert('تعذرت إضافة الموعد', getApiErrorMessage(e));
+    } finally {
+      setIsCreatingAppointment(false);
+    }
+  };
+
+  const addScheduleRule = async () => {
+    const weekday = Number(scheduleRuleForm.weekday);
+    const duration = Number(scheduleRuleForm.slot_duration_minutes);
+
+    if (!scheduleRuleForm.start_time || !scheduleRuleForm.end_time || !duration) {
+      Alert.alert('بيانات ناقصة', 'حدد بداية الدوام ونهايته ومدة الجلسة.');
+      return;
+    }
+
+    setIsUpdatingSchedule(true);
+
+    try {
+      const currentRules = schedule?.rules.map((rule) => ({
+        weekday: rule.weekday,
+        start_time: rule.start_time.slice(0, 5),
+        end_time: rule.end_time.slice(0, 5),
+        slot_duration_minutes: rule.slot_duration_minutes,
+      })) ?? [];
+
+      const nextSchedule = await dashboardApi.updateDoctorSchedule({
+        rules: [
+          ...currentRules,
+          {
+            weekday,
+            start_time: scheduleRuleForm.start_time,
+            end_time: scheduleRuleForm.end_time,
+            slot_duration_minutes: duration,
+          },
+        ],
+      });
+
+      setSchedule(nextSchedule);
+      setScheduleRuleForm(emptyScheduleRuleForm);
+      await loadDashboard();
+      Alert.alert('تم الحفظ', 'تمت إضافة وقت الدوام.');
+    } catch (e) {
+      Alert.alert('تعذر حفظ الدوام', getApiErrorMessage(e));
+    } finally {
+      setIsUpdatingSchedule(false);
+    }
+  };
+
+  const createTimeOff = async () => {
+    if (!timeOffForm.starts_at.trim() || !timeOffForm.ends_at.trim()) {
+      Alert.alert('بيانات ناقصة', 'حدد بداية ونهاية الإجازة.');
+      return;
+    }
+
+    setIsCreatingTimeOff(true);
+
+    try {
+      const nextSchedule = await dashboardApi.createDoctorTimeOff({
+        starts_at: normalizeDateTime(timeOffForm.starts_at),
+        ends_at: normalizeDateTime(timeOffForm.ends_at),
+        reason: timeOffForm.reason.trim() || undefined,
+      });
+
+      setSchedule(nextSchedule);
+      setTimeOffForm(emptyTimeOffForm);
+      await loadDashboard();
+      Alert.alert('تم الحفظ', 'تمت إضافة الإجازة.');
+    } catch (e) {
+      Alert.alert('تعذر حفظ الإجازة', getApiErrorMessage(e));
+    } finally {
+      setIsCreatingTimeOff(false);
+    }
+  };
+
+  const refreshSelectedPatient = async () => {
+    if (!selectedPatient) return;
+    const patient = await dashboardApi.getPatientDetails(selectedPatient.patient.id);
+    setSelectedPatient(patient);
+    setPatientProfileForm({ blood_type: patient.patient.blood_type ?? '' });
+  };
+
+  const createPatientRecord = async () => {
+    if (!selectedPatient || !patientRecordForm.title.trim()) {
+      Alert.alert('بيانات ناقصة', 'افتح ملف مريض واكتب عنوان السجل.');
+      return;
+    }
+
+    setIsCreatingPatientRecord(true);
+
+    try {
+      await dashboardApi.createPatientRecord(selectedPatient.patient.id, {
+        type: patientRecordForm.type,
+        title: patientRecordForm.title.trim(),
+        diagnosis: patientRecordForm.diagnosis.trim() || undefined,
+        notes: patientRecordForm.notes.trim() || undefined,
+      });
+      setPatientRecordForm(emptyPatientRecordForm);
+      await refreshSelectedPatient();
+      Alert.alert('تمت الإضافة', 'تمت إضافة بيانات المريض إلى السجل الطبي.');
+    } catch (e) {
+      Alert.alert('تعذرت إضافة السجل', getApiErrorMessage(e));
+    } finally {
+      setIsCreatingPatientRecord(false);
+    }
+  };
+
+  const updatePatientProfile = async () => {
+    if (!selectedPatient || !patientProfileForm.blood_type.trim()) {
+      Alert.alert('بيانات ناقصة', 'افتح ملف مريض واختر زمرة الدم.');
+      return;
+    }
+
+    setIsUpdatingPatientProfile(true);
+
+    try {
+      await dashboardApi.updatePatientProfile(selectedPatient.patient.id, {
+        blood_type: patientProfileForm.blood_type,
+      });
+      await refreshSelectedPatient();
+      Alert.alert('تم الحفظ', 'تم تحديث زمرة الدم.');
+    } catch (e) {
+      Alert.alert('تعذر تحديث زمرة الدم', getApiErrorMessage(e));
+    } finally {
+      setIsUpdatingPatientProfile(false);
+    }
+  };
+
+  const createPatientVital = async () => {
+    if (!selectedPatient || !patientVitalForm.type.trim() || !patientVitalForm.value.trim() || !patientVitalForm.unit.trim()) {
+      Alert.alert('بيانات ناقصة', 'افتح ملف مريض واكتب نوع القياس والقيمة والوحدة.');
+      return;
+    }
+
+    setIsCreatingPatientVital(true);
+
+    try {
+      await dashboardApi.createPatientVital(selectedPatient.patient.id, {
+        type: patientVitalForm.type.trim(),
+        value: Number(patientVitalForm.value),
+        unit: patientVitalForm.unit.trim(),
+      });
+      setPatientVitalForm(emptyPatientVitalForm);
+      await refreshSelectedPatient();
+      Alert.alert('تمت الإضافة', 'تمت إضافة القياس للمريض.');
+    } catch (e) {
+      Alert.alert('تعذر إضافة القياس', getApiErrorMessage(e));
+    } finally {
+      setIsCreatingPatientVital(false);
     }
   };
 
@@ -318,7 +656,9 @@ export default function DashboardScreen() {
     setLoading(true);
 
     try {
-      setSelectedPatient(await dashboardApi.getPatientDetails(appointment.patient.id));
+      const patient = await dashboardApi.getPatientDetails(appointment.patient.id);
+      setSelectedPatient(patient);
+      setPatientProfileForm({ blood_type: patient.patient.blood_type ?? '' });
     } catch (e) {
       Alert.alert('تعذر فتح الملف', getApiErrorMessage(e));
     } finally {
@@ -341,6 +681,59 @@ export default function DashboardScreen() {
       await loadDashboard();
     } catch (e) {
       Alert.alert('تعذر تحديث الطبيب', getApiErrorMessage(e));
+    }
+  };
+
+  const createSpecialty = async () => {
+    if (!specialtyForm.name_ar.trim()) {
+      Alert.alert('بيانات ناقصة', 'اكتب اسم الاختصاص قبل الإضافة.');
+      return;
+    }
+
+    setIsCreatingSpecialty(true);
+
+    try {
+      const specialty = await dashboardApi.createSpecialty({
+        name_ar: specialtyForm.name_ar.trim(),
+        description: specialtyForm.description.trim() || undefined,
+      });
+
+      setSpecialtyForm(emptySpecialtyForm);
+      await loadDashboard();
+      setDoctorForm((current) => ({ ...current, specialty_id: String(specialty.id) }));
+      Alert.alert('تمت الإضافة', 'تمت إضافة الاختصاص وأصبح متاحاً لاختيار الطبيب.');
+    } catch (e) {
+      Alert.alert('تعذرت إضافة الاختصاص', getApiErrorMessage(e));
+    } finally {
+      setIsCreatingSpecialty(false);
+    }
+  };
+
+  const createFacility = async () => {
+    if (!facilityForm.name.trim() || !facilityForm.type.trim()) {
+      Alert.alert('بيانات ناقصة', 'اكتب اسم المركز ونوعه قبل الإضافة.');
+      return;
+    }
+
+    setIsCreatingFacility(true);
+
+    try {
+      const facility = await dashboardApi.createFacility({
+        name: facilityForm.name.trim(),
+        type: facilityForm.type.trim(),
+        address: facilityForm.address.trim() || undefined,
+        phone: facilityForm.phone.trim() || undefined,
+        location: facilityForm.location.trim() || undefined,
+      });
+
+      setFacilityForm(emptyFacilityForm);
+      await loadDashboard();
+      setDoctorForm((current) => ({ ...current, facility_id: String(facility.id) }));
+      Alert.alert('تمت الإضافة', 'تمت إضافة المركز وأصبح متاحاً لاختيار الطبيب.');
+    } catch (e) {
+      Alert.alert('تعذرت إضافة المركز', getApiErrorMessage(e));
+    } finally {
+      setIsCreatingFacility(false);
     }
   };
 
@@ -501,6 +894,86 @@ export default function DashboardScreen() {
         {tab === 'appointments' && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{isAdmin ? 'كل المواعيد' : 'مواعيدي'}</Text>
+            {isDoctor && (
+              <View style={styles.formPanel}>
+                <Text style={styles.subsectionTitle}>إضافة موعد</Text>
+                <Text style={styles.formLabel}>المريض</Text>
+                <View style={styles.chipRow}>
+                  {doctorPatients.map((patient) => (
+                    <Pressable
+                      key={patient.id}
+                      style={[
+                        styles.selectionChip,
+                        appointmentForm.patient_id === String(patient.id) && styles.selectionChipActive,
+                      ]}
+                      onPress={() => setAppointmentForm((current) => ({ ...current, patient_id: String(patient.id) }))}
+                    >
+                      <Text
+                        style={[
+                          styles.selectionChipText,
+                          appointmentForm.patient_id === String(patient.id) && styles.selectionChipTextActive,
+                        ]}
+                      >
+                        {patient.name ?? patient.patient_number}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+                <View style={styles.doctorFormGrid}>
+                  <View style={styles.formField}>
+                    <Text style={styles.formLabel}>وقت الموعد</Text>
+                    <TextInput
+                      value={appointmentForm.starts_at}
+                      onChangeText={(value) => setAppointmentForm((current) => ({ ...current, starts_at: value }))}
+                      placeholder="2026-07-15T09:00"
+                      style={styles.input}
+                    />
+                  </View>
+                  <View style={styles.formField}>
+                    <Text style={styles.formLabel}>المدة بالدقائق</Text>
+                    <TextInput
+                      value={appointmentForm.duration_minutes}
+                      onChangeText={(value) => setAppointmentForm((current) => ({ ...current, duration_minutes: value }))}
+                      placeholder="30"
+                      style={styles.input}
+                      keyboardType="numeric"
+                    />
+                  </View>
+                </View>
+                <Text style={styles.formLabel}>الحالة</Text>
+                <View style={styles.chipRow}>
+                  {(['confirmed', 'pending'] as const).map((status) => (
+                    <Pressable
+                      key={status}
+                      style={[styles.selectionChip, appointmentForm.status === status && styles.selectionChipActive]}
+                      onPress={() => setAppointmentForm((current) => ({ ...current, status }))}
+                    >
+                      <Text style={[styles.selectionChipText, appointmentForm.status === status && styles.selectionChipTextActive]}>
+                        {status === 'confirmed' ? 'مؤكد' : 'بانتظار الموافقة'}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+                <View style={styles.formField}>
+                  <Text style={styles.formLabel}>سبب الزيارة</Text>
+                  <TextInput
+                    value={appointmentForm.reason}
+                    onChangeText={(value) => setAppointmentForm((current) => ({ ...current, reason: value }))}
+                    placeholder="سبب مختصر للموعد"
+                    style={styles.input}
+                  />
+                </View>
+                <View style={styles.formActions}>
+                  <Pressable
+                    style={[styles.actionButton, isCreatingAppointment && styles.actionButtonDisabled]}
+                    onPress={() => void createAppointment()}
+                    disabled={isCreatingAppointment}
+                  >
+                    <Text style={styles.actionText}>{isCreatingAppointment ? 'جاري الإضافة...' : 'إضافة الموعد'}</Text>
+                  </Pressable>
+                </View>
+              </View>
+            )}
             {appointments.length ? (
               appointments.map((appointment) => (
                 <AppointmentRow
@@ -523,7 +996,11 @@ export default function DashboardScreen() {
             <Text style={styles.sectionTitle}>ملف المتدرّب/المريض</Text>
             {!selectedPatient ? (
               <EmptyState title="افتح ملفاً من زر المجلد بجانب أي موعد" />
-            ) : (
+            ) : (() => {
+              const latestHeight = latestVital(selectedPatient, ['height', 'height_cm', 'الطول']);
+              const latestWeight = latestVital(selectedPatient, ['weight', 'weight_kg', 'الوزن']);
+
+              return (
               <>
                 <View style={styles.profileHeader}>
                   <View>
@@ -534,8 +1011,137 @@ export default function DashboardScreen() {
                 </View>
                 <View style={styles.miniGrid}>
                   <StatCard label="فصيلة الدم" value={selectedPatient.patient.blood_type ?? 'غير محدد'} icon="droplet" />
-                  <StatCard label="الطول" value={selectedPatient.patient.height_cm ? `${selectedPatient.patient.height_cm} سم` : 'غير محدد'} icon="bar-chart-2" />
-                  <StatCard label="الوزن" value={selectedPatient.patient.weight_kg ? `${selectedPatient.patient.weight_kg} كغ` : 'غير محدد'} icon="activity" />
+                  <StatCard label="الطول" value={latestHeight ? `${latestHeight.value} ${latestHeight.unit}` : 'غير محدد'} icon="bar-chart-2" />
+                  <StatCard label="الوزن" value={latestWeight ? `${latestWeight.value} ${latestWeight.unit}` : 'غير محدد'} icon="activity" />
+                </View>
+                <View style={styles.formPanel}>
+                  <Text style={styles.subsectionTitle}>إضافة بيانات للمريض</Text>
+                  <Text style={styles.formLabel}>زمرة الدم</Text>
+                  <View style={styles.chipRow}>
+                    {bloodTypes.map((bloodType) => (
+                      <Pressable
+                        key={bloodType}
+                        style={[styles.selectionChip, patientProfileForm.blood_type === bloodType && styles.selectionChipActive]}
+                        onPress={() => setPatientProfileForm({ blood_type: bloodType })}
+                      >
+                        <Text style={[styles.selectionChipText, patientProfileForm.blood_type === bloodType && styles.selectionChipTextActive]}>
+                          {bloodType}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                  <View style={styles.formActions}>
+                    <Pressable
+                      style={[styles.actionButtonSecondary, isUpdatingPatientProfile && styles.actionButtonDisabled]}
+                      onPress={() => void updatePatientProfile()}
+                      disabled={isUpdatingPatientProfile}
+                    >
+                      <Text style={styles.actionTextSecondary}>{isUpdatingPatientProfile ? 'جاري الحفظ...' : 'حفظ زمرة الدم'}</Text>
+                    </Pressable>
+                  </View>
+                  <Text style={styles.formLabel}>نوع السجل</Text>
+                  <View style={styles.chipRow}>
+                    {(['visit', 'checkup', 'vaccine'] as const).map((type) => (
+                      <Pressable
+                        key={type}
+                        style={[styles.selectionChip, patientRecordForm.type === type && styles.selectionChipActive]}
+                        onPress={() => setPatientRecordForm((current) => ({ ...current, type }))}
+                      >
+                        <Text style={[styles.selectionChipText, patientRecordForm.type === type && styles.selectionChipTextActive]}>
+                          {type === 'visit' ? 'زيارة' : type === 'checkup' ? 'فحص' : 'لقاح'}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                  <View style={styles.doctorFormGrid}>
+                    <View style={styles.formField}>
+                      <Text style={styles.formLabel}>عنوان السجل</Text>
+                      <TextInput
+                        value={patientRecordForm.title}
+                        onChangeText={(value) => setPatientRecordForm((current) => ({ ...current, title: value }))}
+                        placeholder="مثال: متابعة جلسة"
+                        style={styles.input}
+                      />
+                    </View>
+                    <View style={styles.formField}>
+                      <Text style={styles.formLabel}>التشخيص</Text>
+                      <TextInput
+                        value={patientRecordForm.diagnosis}
+                        onChangeText={(value) => setPatientRecordForm((current) => ({ ...current, diagnosis: value }))}
+                        placeholder="تشخيص مختصر"
+                        style={styles.input}
+                      />
+                    </View>
+                  </View>
+                  <View style={styles.formField}>
+                    <Text style={styles.formLabel}>الملاحظات والخطة</Text>
+                    <TextInput
+                      value={patientRecordForm.notes}
+                      onChangeText={(value) => setPatientRecordForm((current) => ({ ...current, notes: value }))}
+                      placeholder="ملاحظات الطبيب أو خطة المتابعة"
+                      style={[styles.input, styles.multilineInput]}
+                      multiline
+                    />
+                  </View>
+                  <View style={styles.formActions}>
+                    <Pressable
+                      style={[styles.actionButton, isCreatingPatientRecord && styles.actionButtonDisabled]}
+                      onPress={() => void createPatientRecord()}
+                      disabled={isCreatingPatientRecord}
+                    >
+                      <Text style={styles.actionText}>{isCreatingPatientRecord ? 'جاري الحفظ...' : 'إضافة سجل طبي'}</Text>
+                    </Pressable>
+                  </View>
+
+                  <Text style={styles.subsectionTitle}>إضافة قياس حيوي</Text>
+                  <Text style={styles.formLabel}>نوع القياس</Text>
+                  <View style={styles.chipRow}>
+                    {vitalTypeOptions.map((option) => (
+                      <Pressable
+                        key={option.type}
+                        style={[styles.selectionChip, patientVitalForm.type === option.type && styles.selectionChipActive]}
+                        onPress={() => setPatientVitalForm((current) => ({
+                          ...current,
+                          type: option.type,
+                          unit: option.unit,
+                        }))}
+                      >
+                        <Text style={[styles.selectionChipText, patientVitalForm.type === option.type && styles.selectionChipTextActive]}>
+                          {option.label}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                  <View style={styles.doctorFormGrid}>
+                    <View style={styles.formField}>
+                      <Text style={styles.formLabel}>القيمة</Text>
+                      <TextInput
+                        value={patientVitalForm.value}
+                        onChangeText={(value) => setPatientVitalForm((current) => ({ ...current, value }))}
+                        placeholder="72"
+                        style={styles.input}
+                        keyboardType="numeric"
+                      />
+                    </View>
+                    <View style={styles.formField}>
+                      <Text style={styles.formLabel}>الوحدة</Text>
+                      <TextInput
+                        value={patientVitalForm.unit}
+                        onChangeText={(value) => setPatientVitalForm((current) => ({ ...current, unit: value }))}
+                        placeholder="bpm, kg, mmHg"
+                        style={styles.input}
+                      />
+                    </View>
+                  </View>
+                  <View style={styles.formActions}>
+                    <Pressable
+                      style={[styles.actionButton, isCreatingPatientVital && styles.actionButtonDisabled]}
+                      onPress={() => void createPatientVital()}
+                      disabled={isCreatingPatientVital}
+                    >
+                      <Text style={styles.actionText}>{isCreatingPatientVital ? 'جاري الحفظ...' : 'إضافة القياس'}</Text>
+                    </Pressable>
+                  </View>
                 </View>
                 <Text style={styles.subsectionTitle}>السجل الطبي</Text>
                 {selectedPatient.records.length ? selectedPatient.records.map((record) => (
@@ -544,14 +1150,120 @@ export default function DashboardScreen() {
                     <Text style={styles.rowMeta}>{record.diagnosis ?? record.notes ?? 'بدون ملاحظات'}</Text>
                   </View>
                 )) : <EmptyState title="لا توجد سجلات لهذا المدرب بعد" />}
+                <Text style={styles.subsectionTitle}>القياسات الأخيرة</Text>
+                {selectedPatient.vitals.length ? selectedPatient.vitals.map((vital) => (
+                  <View style={styles.noteRow} key={vital.id}>
+                    <Text style={styles.rowTitle}>{vital.type}</Text>
+                    <Text style={styles.rowMeta}>{vital.value} {vital.unit} · {formatDate(vital.measured_at)}</Text>
+                  </View>
+                )) : <EmptyState title="لا توجد قياسات مسجلة لهذا المريض" />}
               </>
-            )}
+              );
+            })()}
           </View>
         )}
 
         {tab === 'schedule' && isDoctor && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>الدوام والإجازات</Text>
+            <View style={styles.formPanel}>
+              <Text style={styles.subsectionTitle}>إضافة وقت دوام</Text>
+              <Text style={styles.formLabel}>اليوم</Text>
+              <View style={styles.chipRow}>
+                {weekdays.map((day, index) => (
+                  <Pressable
+                    key={day}
+                    style={[styles.selectionChip, scheduleRuleForm.weekday === String(index) && styles.selectionChipActive]}
+                    onPress={() => setScheduleRuleForm((current) => ({ ...current, weekday: String(index) }))}
+                  >
+                    <Text style={[styles.selectionChipText, scheduleRuleForm.weekday === String(index) && styles.selectionChipTextActive]}>
+                      {day}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+              <View style={styles.doctorFormGrid}>
+                <View style={styles.formField}>
+                  <Text style={styles.formLabel}>من الساعة</Text>
+                  <TextInput
+                    value={scheduleRuleForm.start_time}
+                    onChangeText={(value) => setScheduleRuleForm((current) => ({ ...current, start_time: value }))}
+                    placeholder="09:00"
+                    style={styles.input}
+                  />
+                </View>
+                <View style={styles.formField}>
+                  <Text style={styles.formLabel}>إلى الساعة</Text>
+                  <TextInput
+                    value={scheduleRuleForm.end_time}
+                    onChangeText={(value) => setScheduleRuleForm((current) => ({ ...current, end_time: value }))}
+                    placeholder="15:00"
+                    style={styles.input}
+                  />
+                </View>
+                <View style={styles.formField}>
+                  <Text style={styles.formLabel}>مدة الجلسة</Text>
+                  <TextInput
+                    value={scheduleRuleForm.slot_duration_minutes}
+                    onChangeText={(value) => setScheduleRuleForm((current) => ({ ...current, slot_duration_minutes: value }))}
+                    placeholder="30"
+                    style={styles.input}
+                    keyboardType="numeric"
+                  />
+                </View>
+              </View>
+              <View style={styles.formActions}>
+                <Pressable
+                  style={[styles.actionButton, isUpdatingSchedule && styles.actionButtonDisabled]}
+                  onPress={() => void addScheduleRule()}
+                  disabled={isUpdatingSchedule}
+                >
+                  <Text style={styles.actionText}>{isUpdatingSchedule ? 'جاري الحفظ...' : 'إضافة وقت الدوام'}</Text>
+                </Pressable>
+              </View>
+            </View>
+
+            <View style={styles.formPanel}>
+              <Text style={styles.subsectionTitle}>إضافة إجازة</Text>
+              <View style={styles.doctorFormGrid}>
+                <View style={styles.formField}>
+                  <Text style={styles.formLabel}>تبدأ في</Text>
+                  <TextInput
+                    value={timeOffForm.starts_at}
+                    onChangeText={(value) => setTimeOffForm((current) => ({ ...current, starts_at: value }))}
+                    placeholder="2026-07-20T09:00"
+                    style={styles.input}
+                  />
+                </View>
+                <View style={styles.formField}>
+                  <Text style={styles.formLabel}>تنتهي في</Text>
+                  <TextInput
+                    value={timeOffForm.ends_at}
+                    onChangeText={(value) => setTimeOffForm((current) => ({ ...current, ends_at: value }))}
+                    placeholder="2026-07-20T15:00"
+                    style={styles.input}
+                  />
+                </View>
+              </View>
+              <View style={styles.formField}>
+                <Text style={styles.formLabel}>السبب</Text>
+                <TextInput
+                  value={timeOffForm.reason}
+                  onChangeText={(value) => setTimeOffForm((current) => ({ ...current, reason: value }))}
+                  placeholder="سبب الإجازة"
+                  style={styles.input}
+                />
+              </View>
+              <View style={styles.formActions}>
+                <Pressable
+                  style={[styles.actionButton, isCreatingTimeOff && styles.actionButtonDisabled]}
+                  onPress={() => void createTimeOff()}
+                  disabled={isCreatingTimeOff}
+                >
+                  <Text style={styles.actionText}>{isCreatingTimeOff ? 'جاري الحفظ...' : 'إضافة الإجازة'}</Text>
+                </Pressable>
+              </View>
+            </View>
             {schedule?.rules.length ? schedule.rules.map((rule) => (
               <View style={styles.tableRow} key={rule.id}>
                 <View>
@@ -590,6 +1302,102 @@ export default function DashboardScreen() {
                   </View>
                 </View>
               ))}
+            </View>
+
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>إضافة اختصاص أو مركز</Text>
+              <View style={styles.catalogFormGrid}>
+                <View style={styles.catalogFormColumn}>
+                  <Text style={styles.subsectionTitle}>اختصاص طبي</Text>
+                  <View style={styles.formField}>
+                    <Text style={styles.formLabel}>اسم الاختصاص</Text>
+                    <TextInput
+                      value={specialtyForm.name_ar}
+                      onChangeText={(value) => setSpecialtyForm((current) => ({ ...current, name_ar: value }))}
+                      placeholder="مثال: العظام"
+                      style={styles.input}
+                    />
+                  </View>
+                  <View style={styles.formField}>
+                    <Text style={styles.formLabel}>الوصف</Text>
+                    <TextInput
+                      value={specialtyForm.description}
+                      onChangeText={(value) => setSpecialtyForm((current) => ({ ...current, description: value }))}
+                      placeholder="وصف مختصر للاختصاص"
+                      style={[styles.input, styles.multilineInput]}
+                      multiline
+                    />
+                  </View>
+                  <Pressable
+                    style={[styles.actionButton, isCreatingSpecialty && styles.actionButtonDisabled]}
+                    onPress={() => void createSpecialty()}
+                    disabled={isCreatingSpecialty}
+                  >
+                    <Text style={styles.actionText}>{isCreatingSpecialty ? 'جاري الإضافة...' : 'إضافة الاختصاص'}</Text>
+                  </Pressable>
+                </View>
+
+                <View style={styles.catalogFormColumn}>
+                  <Text style={styles.subsectionTitle}>مركز/عيادة</Text>
+                  <View style={styles.doctorFormGrid}>
+                    <View style={styles.formField}>
+                      <Text style={styles.formLabel}>اسم المركز</Text>
+                      <TextInput
+                        value={facilityForm.name}
+                        onChangeText={(value) => setFacilityForm((current) => ({ ...current, name: value }))}
+                        placeholder="مثال: مركز أقدر الطبي"
+                        style={styles.input}
+                      />
+                    </View>
+                    <View style={styles.formField}>
+                      <Text style={styles.formLabel}>النوع</Text>
+                      <TextInput
+                        value={facilityForm.type}
+                        onChangeText={(value) => setFacilityForm((current) => ({ ...current, type: value }))}
+                        placeholder="عيادة، مستشفى، مركز"
+                        style={styles.input}
+                      />
+                    </View>
+                  </View>
+                  <View style={styles.doctorFormGrid}>
+                    <View style={styles.formField}>
+                      <Text style={styles.formLabel}>العنوان</Text>
+                      <TextInput
+                        value={facilityForm.address}
+                        onChangeText={(value) => setFacilityForm((current) => ({ ...current, address: value }))}
+                        placeholder="عنوان المركز"
+                        style={styles.input}
+                      />
+                    </View>
+                    <View style={styles.formField}>
+                      <Text style={styles.formLabel}>الهاتف</Text>
+                      <TextInput
+                        value={facilityForm.phone}
+                        onChangeText={(value) => setFacilityForm((current) => ({ ...current, phone: value }))}
+                        placeholder="+963110000000"
+                        style={styles.input}
+                        keyboardType="phone-pad"
+                      />
+                    </View>
+                  </View>
+                  <View style={styles.formField}>
+                    <Text style={styles.formLabel}>الموقع</Text>
+                    <TextInput
+                      value={facilityForm.location}
+                      onChangeText={(value) => setFacilityForm((current) => ({ ...current, location: value }))}
+                      placeholder="إحداثيات أو رابط موقع"
+                      style={styles.input}
+                    />
+                  </View>
+                  <Pressable
+                    style={[styles.actionButton, isCreatingFacility && styles.actionButtonDisabled]}
+                    onPress={() => void createFacility()}
+                    disabled={isCreatingFacility}
+                  >
+                    <Text style={styles.actionText}>{isCreatingFacility ? 'جاري الإضافة...' : 'إضافة المركز'}</Text>
+                  </Pressable>
+                </View>
+              </View>
             </View>
 
             <View style={styles.section}>
@@ -961,9 +1769,25 @@ const styles = StyleSheet.create({
     color: colors.primary,
     textAlign: 'right',
   },
+  formPanel: {
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingTop: 12,
+    gap: 12,
+  },
   doctorFormGrid: {
     flexDirection: 'row-reverse',
     flexWrap: 'wrap',
+    gap: 12,
+  },
+  catalogFormGrid: {
+    flexDirection: 'row-reverse',
+    flexWrap: 'wrap',
+    gap: 20,
+  },
+  catalogFormColumn: {
+    minWidth: 320,
+    flex: 1,
     gap: 12,
   },
   formField: {

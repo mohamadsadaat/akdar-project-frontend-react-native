@@ -54,6 +54,49 @@ export type DoctorSchedule = {
   }[];
 };
 
+export type CreateDoctorAppointmentPayload = {
+  patient_id: number;
+  starts_at: string;
+  duration_minutes: number;
+  status?: 'pending' | 'confirmed';
+  reason?: string;
+};
+
+export type UpdateDoctorSchedulePayload = {
+  rules: {
+    weekday: number;
+    start_time: string;
+    end_time: string;
+    slot_duration_minutes: number;
+  }[];
+};
+
+export type CreateDoctorTimeOffPayload = {
+  starts_at: string;
+  ends_at: string;
+  reason?: string;
+};
+
+export type CreatePatientRecordPayload = {
+  recorded_at?: string;
+  type: 'visit' | 'checkup' | 'vaccine';
+  title: string;
+  diagnosis?: string;
+  notes?: string;
+};
+
+export type CreatePatientVitalPayload = {
+  type: string;
+  value: number;
+  unit: string;
+  measured_at?: string;
+  source?: string;
+};
+
+export type UpdatePatientProfilePayload = {
+  blood_type?: string | null;
+};
+
 export type AdminUser = ApiUser & {
   patient_profile?: unknown;
   doctor?: ApiDoctor | null;
@@ -68,6 +111,7 @@ export type CreateFacilityPayload = {
   type: string;
   address?: string;
   phone?: string;
+  location?: string;
 };
 
 export type Catalogs = {
@@ -109,6 +153,11 @@ export const dashboardApi = {
     return response.data;
   },
 
+  async createDoctorAppointment(payload: CreateDoctorAppointmentPayload) {
+    const response = await apiClient.post<DataResponse<ApiAppointment>>('/doctor-dashboard/appointments', payload);
+    return response.data.data;
+  },
+
   async updateDoctorAppointmentStatus(
     id: number,
     payload: { status: 'confirmed' | 'completed' | 'cancelled' | 'no_show'; reason?: string; session_notes?: string; diagnosis?: string; plan?: string },
@@ -144,8 +193,47 @@ export const dashboardApi = {
     return response.data.data;
   },
 
+  async getDoctorPatients() {
+    const response = await apiClient.get<DataResponse<ApiPatientSummary[]>>('/doctor-dashboard/patients');
+    return response.data.data;
+  },
+
+  async createPatientRecord(patientId: number, payload: CreatePatientRecordPayload) {
+    const response = await apiClient.post<DataResponse<PatientDetails['records'][number]>>(
+      `/doctor-dashboard/patients/${patientId}/records`,
+      payload,
+    );
+    return response.data.data;
+  },
+
+  async updatePatientProfile(patientId: number, payload: UpdatePatientProfilePayload) {
+    const response = await apiClient.patch<DataResponse<ApiPatientSummary>>(
+      `/doctor-dashboard/patients/${patientId}/profile`,
+      payload,
+    );
+    return response.data.data;
+  },
+
+  async createPatientVital(patientId: number, payload: CreatePatientVitalPayload) {
+    const response = await apiClient.post<DataResponse<PatientDetails['vitals'][number]>>(
+      `/doctor-dashboard/patients/${patientId}/vitals`,
+      payload,
+    );
+    return response.data.data;
+  },
+
   async getDoctorSchedule() {
     const response = await apiClient.get<DataResponse<DoctorSchedule>>('/doctor-dashboard/schedule');
+    return response.data.data;
+  },
+
+  async updateDoctorSchedule(payload: UpdateDoctorSchedulePayload) {
+    const response = await apiClient.put<DataResponse<DoctorSchedule>>('/doctor-dashboard/schedule', payload);
+    return response.data.data;
+  },
+
+  async createDoctorTimeOff(payload: CreateDoctorTimeOffPayload) {
+    const response = await apiClient.post<DataResponse<DoctorSchedule>>('/doctor-dashboard/time-offs', payload);
     return response.data.data;
   },
 
